@@ -1,1 +1,2 @@
-# B_plus_tree
+# B plus tree in C++ implementation 
+* CMPT 454 PROJECT
