@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 #include <queue>
-#include <list>
+#include <set>
 
 #define SUCCESS       0
 #define UNKNOWN_ERROR 1
@@ -28,16 +28,33 @@ using namespace std;
 class Entry {
 private:
   class GarbageCollectionPool {
+  private:
+    set<Entry *> pool;
+    bool is_accessable;
   public:
-    list<Entry *> pool;
-    GarbageCollectionPool() {};
+    GarbageCollectionPool() {
+      is_accessable = true;
+    };
     ~GarbageCollectionPool() {
+      is_accessable = false;
       for (auto it = pool.begin(); it != pool.end(); it++) {
         delete *it;
       }
     }
+
+    void insert(Entry * e) {
+      if (is_accessable) pool.insert(e);
+    }
+    void erase(Entry * e) {
+      if (is_accessable) pool.erase(e);
+    }
+
   };
+<<<<<<< HEAD
   static GarbageCollectionPool GC;
+=======
+  static GarbageCollectionPool GCpool;
+>>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
 
   int type;
 
@@ -45,9 +62,15 @@ public:
   Entry(int _type) { 
     // Type=1 is Value, Type=2 is Node
     type = _type;
+<<<<<<< HEAD
     GC.pool.push_back(this);
+=======
+    GCpool.insert(this);
   }
-  virtual ~Entry() {}
+  virtual ~Entry() {
+    GCpool.erase(this);
+>>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
+  }
   int getType() {
     return type;
   }
