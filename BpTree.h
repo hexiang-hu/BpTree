@@ -158,7 +158,7 @@ public:
   ~BpTree();
 
   // Desired assignment overrides
-  void operator =(const BpTree& _other);
+  BpTree& operator =(const BpTree& _other);
 
   // Desired interfaces for BpTree
   bool insert(int _key, string& _value);

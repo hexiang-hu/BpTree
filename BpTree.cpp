@@ -198,11 +198,12 @@ BpTree::~BpTree() {
 
 
 // Desired assignment overrides
-void BpTree::operator =(const BpTree& _other) {
+BpTree& BpTree::operator =(const BpTree& _other) {
   root = _other.root;
   height = _other.height;
   key_num = _other.key_num;
   node_number = _other.node_number;
+  return *this;
 }
 
 
