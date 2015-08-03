@@ -289,8 +289,7 @@ void BpTree::printValues() {
   // Iterate the leaf level tree nodes
   do{
     current_node->printValues();
-    //current_node = current_node->extra_entry;
-    current_node = current_node->right_sib;
+    current_node = current_node->extra_entry;
   }
   while ( current_node );
 
