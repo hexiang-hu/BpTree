@@ -43,18 +43,18 @@ int main(int argc, const char * argv[]) {
 
   /////////////////////////TEST CASE 1
   BpTree bptree(3);
-  map<int, string> str;
-  str[2]  = string("A");
-  str[21] = string("B");
-  str[11] = string("C");
-  str[8]  = string("D");
-  str[64] = string("E");
-  str[5]  = string("F");
-  str[23] = string("G");
-  str[6]  = string("H");
-  str[19] = string("I");
-  str[9]  = string("J");
-  str[7]  = string("K");
+  map<int, string> key_val_map;
+  key_val_map[2]  = string("A");
+  key_val_map[21] = string("B");
+  key_val_map[11] = string("C");
+  key_val_map[8]  = string("D");
+  key_val_map[64] = string("E");
+  key_val_map[5]  = string("F");
+  key_val_map[23] = string("G");
+  key_val_map[6]  = string("H");
+  key_val_map[19] = string("I");
+  key_val_map[9]  = string("J");
+  key_val_map[7]  = string("K");
 
   if(tCaseNum & CASE_NUM_1) {
 
@@ -63,39 +63,39 @@ int main(int argc, const char * argv[]) {
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
-    bptree.insert(2, str[0]);
-    bptree.insert(21, str[1]);
-    bptree.insert(11, str[2]);
-    bptree.insert(8, str[3]);
+    bptree.insert(2, key_val_map[2]);
+    bptree.insert(21, key_val_map[21]);
+    bptree.insert(11, key_val_map[11]);
+    bptree.insert(8, key_val_map[8]);
     
     printf("################ insert 2, 21, 11, 8 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
-    bptree.insert(64, str[4]);
-    bptree.insert(5, str[5]);
+    bptree.insert(64, key_val_map[64]);
+    bptree.insert(5, key_val_map[5]);
     printf("################ insert 64, 5 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
     
-    bptree.insert(23, str[6]);
+    bptree.insert(23, key_val_map[23]);
     printf("################ insert 23 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
     
-    bptree.insert(6, str[7]);
+    bptree.insert(6, key_val_map[6]);
     printf("################ insert 6 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
     
-    bptree.insert(19, str[8]);
-    bptree.insert(9, str[9]);
-    bptree.insert(5, str[2]);
+    bptree.insert(19, key_val_map[19]);
+    bptree.insert(9, key_val_map[9]);
+    bptree.insert(5, key_val_map[5]);
     printf("################ insert 19, 9, 5(duplicated) ########################\n"); bptree.printKeys();
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
     
-    bptree.insert(7, str[10]);
+    bptree.insert(7, key_val_map[7]);
     printf("################ insert 7 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
@@ -123,11 +123,16 @@ int main(int argc, const char * argv[]) {
     BpTree bptree2(key_num);
     srand (time(NULL));
     for (int i=0; i<node_number; i++) {
-      bptree2.insert(rand() % (node_number * 2), str[ rand() % 11 ]);
+      bptree2.insert(rand() % (node_number * 2), key_val_map[ rand() % 11 ]);
     }
 
     printf("\n\n\n\n################ Huge tree ########################\n");
     bptree2.printKeys();
+  }
+
+  for (auto it = key_val_map.begin(); it != key_val_map.end(); ++it)
+  {
+    printf("key: %d, value: %s\n", it->first, it->second.c_str());
   }
 
   return 0;
