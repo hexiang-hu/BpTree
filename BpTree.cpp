@@ -16,7 +16,7 @@ Node::Node() : Entry(CLASS_NODE) {
   extra_entry = NULL; 
 
   parent = NULL;
-  left_sib = NULL
+  left_sib = NULL;
   right_sib = NULL;
 
   number += 1; // static member access
@@ -52,7 +52,7 @@ Entry * Node::findChild(int _key) {
   auto it = pairs.begin();
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if ( (*it).first > _key ) {
-      return (*it)->second;
+      return (*it).second;
     }
   }
   return extra_entry;
@@ -60,7 +60,7 @@ Entry * Node::findChild(int _key) {
 
 
 int Node::insert(int _key, Entry * _entry) {
-  if ((int)pairs.size() + 1 < key_num) {
+  if ((int)pairs.size() < key_num) {
     return forceInsert(_key, _entry);
   }
   else {
@@ -72,7 +72,7 @@ int Node::insert(int _key, Entry * _entry) {
 int Node::forceInsert(int _key, Entry * _entry) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if ( _key < (*it).first ) {
-      pairs.insert(it, make_pair(_key, _entry))
+      pairs.insert(it, make_pair(_key, _entry));
       if ( !isLeaf() ) ((Node *) _entry)->parent = this;
       return SUCCESS;
     }
@@ -88,7 +88,7 @@ int Node::forceInsert(int _key, Entry * _entry) {
 
 pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   int insert_status = forceInsert(_key, _entry);
-  if (insert_status == SAME_KEY) return NULL; // didn't insert anything
+  if (insert_status == SAME_KEY) return pair<int, Entry *>(-1, NULL); // didn't insert anything
 
   // from: temp_left_sib <---> this
   // to:   temp_left_sib <---> left_node <---> this
@@ -101,22 +101,33 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   int new_key;
   if (isLeaf()) {
     if (temp_left_sib != NULL) temp_left_sib->setNextLeaf(left_node);
-    left_node.setNextLeaf( getNextLeaf() );
+    left_node->setNextLeaf( getNextLeaf() );
     new_key = pairs[ (pairs.size()+1)/2 ].first;
   }
   else {
     new_key = pairs[ pairs.size()/2 ].first;
   }
 
+  // if (_key == 8) {
+  //   printf("~~~~~~~~~~~~~~~~~\n");
+  //   printKeys();
+  //   printf("new_key=%d\n", new_key);
+  //   printf("~~~~~~~~~~~~~~~~~\n");
+  // }
 
-  for (auto it = pairs.begin(); it != left; it++) {
-    if (*it != new_key) {
+
+  for (auto it = pairs.begin(); it != pairs.end(); it++) {
+    if ((*it).first != new_key) {
       left_node->pairs.push_back( *it );
-      if ( !isLeaf() ) (*it).second->parent = left_node;
+      if ( !isLeaf() ) ((Node *)(*it).second)->parent = left_node;
     }
     else {
-      if ( !isLeaf() ) left_node->extra_entry = (*it).second;
+      if ( !isLeaf() ) {
+        left_node->extra_entry = (Node *)(*it).second;
+        it++;
+      }
       pairs.erase(pairs.begin(), it);
+      break;
     }
   }
 
@@ -153,6 +164,7 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
 BpTree::BpTree(int _key_num) {
   Node::key_num = _key_num;
   root = new Node();
+  height = 1;
 }
 
 
@@ -168,41 +180,91 @@ BpTree::~BpTree() {
 
 
 
-void BpTree::makeNewRoot(int _key, Node * left, Node * right) {
-  root = new Node(_key, left, right);
-}
-
-
 // Desired assignment overrides
-void BpTree::operator =(BpTree&) {
-  root = _copy.root;
+void BpTree::operator =(BpTree& _other) {
+  root = _other.root;
 }
 
 
 bool BpTree::insert(int _key, string& _value) {
   
   Node * current_node = root;
-  while ( !current_node.isLeaf() ) {
+  while ( !current_node->isLeaf() ) {
     current_node = (Node *)current_node->findChild(_key);
   }
 
   int key = _key;
   Entry * entry = new Value(_value);
-  while ( current_node->insert(_key, entry) == FULL ) {
-    auto p = current_node->split(_key, entry);
+  while ( current_node->insert(key, entry) == FULL ) {
+
+    // printf("here!\n");
+    // current_node->printKeys();
+    // printf("Before split!\n");
+
+    auto p = current_node->split(key, entry);
+
+    // printf("p.first=%d\n", p.first);
+
+    if (p.second == NULL) break;
     key = p.first;
     entry = p.second;
     if (current_node->parent == NULL) {
-      makeNewRoot(key, p.second, current_node);
+      makeNewRoot(key, (Node *)p.second, current_node);
       break;
+    }
+    else {
+      current_node = current_node->parent;
     }
   }
 
 }
 
 
-bool BpTree::remove(int _key) {}
-string BpTree::find(int _key) {}
-void BpTree::printKeys() {}
+bool BpTree::remove(int _key) {
+  return true;
+}
+
+
+string BpTree::find(int _key) {
+  return "alalal";
+}
+
+
+void BpTree::printKeys() {
+  // Node * current_node = root;
+  // Node * next_level_first_node;
+  // for (int i=0; i<height; i++) {
+  //   if ((i+1<height) && (current_node->pairs.size()>0)) next_level_first_node = (Node *)current_node->pairs[0].second;
+  //   else next_level_first_node = NULL;
+  //   while (current_node != NULL) {
+  //     current_node->printKeys();
+  //     current_node = current_node->right_sib;
+  //   }
+  //   printf("\n");
+  //   current_node = next_level_first_node;
+  // }
+
+  queue< pair<int, Node *> > que;
+  que.push( make_pair(1, root) ); 
+  int cur_level = 1;
+  while ( !que.empty() ) {
+    auto cur = que.front();
+    que.pop();
+    if ( !cur.second->isLeaf() ) {
+      for (auto it = cur.second->pairs.begin(); it != cur.second->pairs.end(); it++) { 
+        que.push( make_pair(cur.first + 1, (Node *)(*it).second) );
+      }
+      que.push( make_pair(cur.first + 1, (Node *)cur.second->extra_entry) );
+    }
+    if (cur.first > cur_level) {
+      printf("\n");
+      cur_level = cur.first;
+    }
+    cur.second->printKeys();
+  }
+  printf("\n");
+}
+
+
 void BpTree::printValues() {}
 

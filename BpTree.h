@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <queue>
 
 #define SUCCESS 0
 #define UNKNOWN_ERROR 1
@@ -42,7 +43,7 @@ public:
   Value(string _value): Entry(CLASS_VALUE) {
     value = _value;
   }
-  getValue() {
+  string getValue() {
     return value;
   }
 };
@@ -69,7 +70,7 @@ public:
 
   // Constructor
   Node();
-  Node::Node(int _key, Node * left, Node * right);  // only for making new root
+  Node(int _key, Node * left, Node * right);  // only for making new root
 
   // Deconstructor
   ~Node();
@@ -90,9 +91,18 @@ public:
     extra_entry = _next_leaf;
   }
 
-  void becomeRightSibingOf(Node * left) {
-    if (left != NULL) left->right_sib = this;
-    this->left_sib = left;
+  void becomeRightSibingOf(Node * _left) {
+    if (_left != NULL) _left->right_sib = this;
+    this->left_sib = _left;
+  }
+
+  void printKeys() {
+    printf("[");
+    for (auto it = pairs.begin(); it != pairs.end(); it++) {
+      if (it == pairs.begin()) printf("%d", (*it).first);
+      else printf(",%d", (*it).first);
+    }
+    printf("] ");
   }
 
   // static members
@@ -106,12 +116,16 @@ public:
 class BpTree {
 private:
   Node * root;
+  int height;
 
-  void makeNewRoot(int _key, Node * left, Node * right);
+  void makeNewRoot(int _key, Node * _left, Node * _right) {
+    root = new Node(_key, _left, _right);
+    height += 1;
+  }
 
 public:
   // Constructor
-  BpTree(int _key_num):key_num(_key_num);
+  BpTree(int _key_num);
   // Copy constructor
   BpTree(const BpTree& _copy);
   
@@ -119,7 +133,7 @@ public:
   ~BpTree();
 
   // Desired assignment overrides
-  void operator =(BpTree&);
+  void operator =(BpTree& _other);
 
   // Desired interfaces for BpTree
   bool insert(int _key, string& _value);
