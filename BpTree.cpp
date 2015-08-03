@@ -49,13 +49,21 @@ Node::~Node() {
 
 
 Entry * Node::findChild(int _key) {
-  auto it = pairs.begin();
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if ( (*it).first > _key ) {
       return (*it).second;
     }
   }
   return extra_entry;
+}
+
+Entry * Node::findValueEntry(int _key) {
+  for (auto it = pairs.begin(); it != pairs.end(); it++) {
+    if ( (*it).first == _key ) {
+      return (*it).second;
+    }
+  }
+  return NULL;
 }
 
 
@@ -107,14 +115,6 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   else {
     new_key = pairs[ pairs.size()/2 ].first;
   }
-
-  // if (_key == 8) {
-  //   printf("~~~~~~~~~~~~~~~~~\n");
-  //   printKeys();
-  //   printf("new_key=%d\n", new_key);
-  //   printf("~~~~~~~~~~~~~~~~~\n");
-  // }
-
 
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if ((*it).first != new_key) {
@@ -196,15 +196,7 @@ bool BpTree::insert(int _key, string& _value) {
   int key = _key;
   Entry * entry = new Value(_value);
   while ( current_node->insert(key, entry) == FULL ) {
-
-    // printf("here!\n");
-    // current_node->printKeys();
-    // printf("Before split!\n");
-
     auto p = current_node->split(key, entry);
-
-    // printf("p.first=%d\n", p.first);
-
     if (p.second == NULL) break;
     key = p.first;
     entry = p.second;
@@ -226,7 +218,17 @@ bool BpTree::remove(int _key) {
 
 
 string BpTree::find(int _key) {
-  return "alalal";
+  Node * current_node = root;
+  while ( !current_node->isLeaf() ) {
+    current_node = (Node *)current_node->findChild(_key);
+  }
+  Entry * valueEntry = current_node->findValueEntry(_key);
+  if (valueEntry == NULL) {
+    return string("");
+  }
+  else {
+    return ((Value *)valueEntry)->getValue();
+  }
 }
 
 

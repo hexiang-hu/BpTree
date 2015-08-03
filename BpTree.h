@@ -78,8 +78,9 @@ public:
   int insert(int _key, Entry * _entry);
   int forceInsert(int _key, Entry * _entry);
   pair<int, Entry *> split(int _key, Entry * _entry);
-  Entry * findChild(int _key);
 
+  Entry * findChild(int _key);
+  Entry * findValueEntry(int _key);
 
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
