@@ -7,10 +7,7 @@
 // Node class
 
 
-unsigned int Node::number  = 0;
-unsigned int Node::key_num = 0;
-
-Node::Node() : Entry(CLASS_NODE) {
+Node::Node(BpTree * _tree) : Entry(CLASS_NODE) {
   pairs.clear();
 
   extra_entry = NULL; 
@@ -19,11 +16,12 @@ Node::Node() : Entry(CLASS_NODE) {
   left_sib = NULL;
   right_sib = NULL;
 
-  number += 1; // static member access
+  tree = _tree;
+  tree->node_number += 1;
 }
 
 
-Node::Node(int _key, Node * left, Node * right) : Entry(CLASS_NODE) { // only for making new root
+Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NODE) { // only for making new root
   pairs.clear();
 
   pairs.push_back( make_pair(_key, (Entry *)left) );
@@ -39,12 +37,13 @@ Node::Node(int _key, Node * left, Node * right) : Entry(CLASS_NODE) { // only fo
 
   right->becomeRightSibingOf(left);
 
-  number += 1;
+  tree = _tree;
+  tree->node_number += 1;
 }
 
 
 Node::~Node() {
-  number -= 1;
+  tree->node_number -= 1;
 }
 
 
@@ -68,7 +67,7 @@ Entry * Node::findValueEntry(int _key) {
 
 
 int Node::insert(int _key, Entry * _entry) {
-  if ((int)pairs.size() < key_num) {
+  if ((int)pairs.size() < tree->key_num) {
     return forceInsert(_key, _entry);
   }
   else {
@@ -100,7 +99,7 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
 
   // from: temp_left_sib <---> this
   // to:   temp_left_sib <---> left_node <---> this
-  Node * left_node = new Node();
+  Node * left_node = new Node(tree);
 
   Node * temp_left_sib = left_sib;
   left_node->becomeRightSibingOf( temp_left_sib );
@@ -162,15 +161,16 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
 
 // Constructor
 BpTree::BpTree(int _key_num) {
-  Node::key_num = _key_num;
-  root = new Node();
+  node_number = 0;
+  root = new Node(this);
   height = 1;
+  key_num = _key_num;
 }
 
 
 // Copy constructor
 BpTree::BpTree(const BpTree& _copy) {
-  root = _copy.root;
+  (*this) = _copy; // use operator =
 }
 
 
@@ -181,8 +181,11 @@ BpTree::~BpTree() {
 
 
 // Desired assignment overrides
-void BpTree::operator =(BpTree& _other) {
+void BpTree::operator =(const BpTree& _other) {
   root = _other.root;
+  height = _other.height;
+  key_num = _other.key_num;
+  node_number = _other.node_number;
 }
 
 

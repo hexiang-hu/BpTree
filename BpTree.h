@@ -49,6 +49,7 @@ public:
 };
 
 
+class BpTree;
 
 
 class Node: public Entry {
@@ -68,9 +69,11 @@ public:
   Node * left_sib;  // Louis recommends to store this value
   Node * right_sib; // Louis recommends to store this value, the same as extra_entry when this node is a leaf node
 
+  BpTree * tree;
+
   // Constructor
-  Node();
-  Node(int _key, Node * left, Node * right);  // only for making new root
+  Node(BpTree * _tree);
+  Node(BpTree * _tree, int _key, Node * left, Node * right);  // only for making new root
 
   // Deconstructor
   ~Node();
@@ -105,10 +108,6 @@ public:
     }
     printf("] ");
   }
-
-  // static members
-  static unsigned int number;
-  static unsigned int key_num;
 };
 
 
@@ -120,11 +119,15 @@ private:
   int height;
 
   void makeNewRoot(int _key, Node * _left, Node * _right) {
-    root = new Node(_key, _left, _right);
+    root = new Node(this, _key, _left, _right);
     height += 1;
   }
 
 public:
+
+  int node_number;
+  int key_num;
+
   // Constructor
   BpTree(int _key_num);
   // Copy constructor
@@ -134,7 +137,7 @@ public:
   ~BpTree();
 
   // Desired assignment overrides
-  void operator =(BpTree& _other);
+  void operator =(const BpTree& _other);
 
   // Desired interfaces for BpTree
   bool insert(int _key, string& _value);
