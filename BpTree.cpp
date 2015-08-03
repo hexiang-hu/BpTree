@@ -4,11 +4,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 // Entry class
-<<<<<<< HEAD
-Entry::GarbageCollectionPool Entry::GC = Entry::GarbageCollectionPool();
-=======
 Entry::GarbageCollectionPool Entry::GCpool = Entry::GarbageCollectionPool();
->>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
 
 
 

@@ -50,11 +50,7 @@ private:
     }
 
   };
-<<<<<<< HEAD
-  static GarbageCollectionPool GC;
-=======
   static GarbageCollectionPool GCpool;
->>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
 
   int type;
 
@@ -62,16 +58,11 @@ public:
   Entry(int _type) { 
     // Type=1 is Value, Type=2 is Node
     type = _type;
-<<<<<<< HEAD
-    GC.pool.push_back(this);
-=======
     GCpool.insert(this);
   }
   virtual ~Entry() {
     GCpool.erase(this);
->>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
   }
-  virtual ~Entry() {}
   int getType() {
     return type;
   }
