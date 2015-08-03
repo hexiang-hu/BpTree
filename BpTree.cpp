@@ -18,6 +18,7 @@ Node::Node(BpTree * _tree) : Entry(CLASS_NODE) {
 
   tree = _tree;
   tree->node_number += 1;
+  // static member access
 }
 
 
@@ -41,6 +42,17 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
   tree->node_number += 1;
 }
 
+// Node::Node(const Node& _copy) {
+  
+//   parent      = _copy.parent;
+//   left_sib    = _copy.left_sib;
+//   right_sib   = _copy.right_sib;
+//   extra_entry = _copy.extra_entry;
+
+//   pairs       = _copy.pairs;
+
+//   number += 1;
+// }
 
 Node::~Node() {
   tree->node_number -= 1;
@@ -49,8 +61,8 @@ Node::~Node() {
 
 Entry * Node::findChild(int _key) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
-    if ( (*it).first > _key ) {
-      return (*it).second;
+    if ( it->first > _key ) {
+      return it->second;
     }
   }
   return extra_entry;
@@ -58,13 +70,19 @@ Entry * Node::findChild(int _key) {
 
 Entry * Node::findValueEntry(int _key) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
-    if ( (*it).first == _key ) {
-      return (*it).second;
+    if ( it->first == _key ) {
+      return it->second;
     }
   }
   return NULL;
 }
 
+Entry * Node::findLeftMostChild() {
+  if( pairs.size() > 0 )
+    return pairs.front().second;
+  else
+    return NULL;
+}
 
 int Node::insert(int _key, Entry * _entry) {
   if ((int)pairs.size() < tree->key_num) {
@@ -239,19 +257,6 @@ string BpTree::find(int _key) {
 
 
 void BpTree::printKeys() {
-  // Node * current_node = root;
-  // Node * next_level_first_node;
-  // for (int i=0; i<height; i++) {
-  //   if ((i+1<height) && (current_node->pairs.size()>0)) next_level_first_node = (Node *)current_node->pairs[0].second;
-  //   else next_level_first_node = NULL;
-  //   while (current_node != NULL) {
-  //     current_node->printKeys();
-  //     current_node = current_node->right_sib;
-  //   }
-  //   printf("\n");
-  //   current_node = next_level_first_node;
-  // }
-
   queue< pair<int, Node *> > que;
   que.push( make_pair(1, root) ); 
   int cur_level = 1;
@@ -260,7 +265,7 @@ void BpTree::printKeys() {
     que.pop();
     if ( !cur.second->isLeaf() ) {
       for (auto it = cur.second->pairs.begin(); it != cur.second->pairs.end(); it++) { 
-        que.push( make_pair(cur.first + 1, (Node *)(*it).second) );
+        que.push( make_pair(cur.first + 1, (Node *)it->second) );
       }
       que.push( make_pair(cur.first + 1, (Node *)cur.second->extra_entry) );
     }
@@ -274,5 +279,21 @@ void BpTree::printKeys() {
 }
 
 
-void BpTree::printValues() {}
+void BpTree::printValues() {
+  // Find leftmost key and print out values for the bpTree
+  Node * current_node = root;
+  while ( !current_node->isLeaf() ) {
+    current_node = (Node *)current_node->findLeftMostChild();
+  }
+
+  // Iterate the leaf level tree nodes
+  do{
+    current_node->printValues();
+    //current_node = current_node->extra_entry;
+    current_node = current_node->right_sib;
+  }
+  while ( current_node );
+
+  printf("\n");  
+}
 

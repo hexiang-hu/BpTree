@@ -8,13 +8,13 @@
 #include <utility>
 #include <queue>
 
-#define SUCCESS 0
+#define SUCCESS       0
 #define UNKNOWN_ERROR 1
-#define FULL 2
-#define SAME_KEY 3
+#define FULL          2
+#define SAME_KEY      3
 
-#define CLASS_VALUE 1
-#define CLASS_NODE 2
+#define CLASS_VALUE   1
+#define CLASS_NODE    2
 
 
 
@@ -25,7 +25,8 @@ class Entry {
 private:
   int type;
 public:
-  Entry(int _type) { // Type=1 is Value, Type=2 is Node
+  Entry(int _type) { 
+  // Type=1 is Value, Type=2 is Node
     type = _type;
   }
   int getType() {
@@ -65,16 +66,22 @@ public:
 
   // The following 3 attributes are for the sake of easier implementaion in insert() and remove()
   // Those should not be implemented with shared_ptr
-  Node * parent;    // John recommends to store this value
-  Node * left_sib;  // Louis recommends to store this value
-  Node * right_sib; // Louis recommends to store this value, the same as extra_entry when this node is a leaf node
+  // John recommends to store this value
+  Node * parent;    
 
   BpTree * tree;
 
+  // Louis recommends to store this value
+  Node * left_sib;  
+
+  // Louis recommends to store this value, the same as extra_entry when this node is a leaf node
+  Node * right_sib; 
+
   // Constructor
   Node(BpTree * _tree);
-  Node(BpTree * _tree, int _key, Node * left, Node * right);  // only for making new root
-
+  // only for making new root
+  Node(BpTree * _tree, int _key, Node * left, Node * right);
+  
   // Deconstructor
   ~Node();
 
@@ -84,13 +91,16 @@ public:
 
   Entry * findChild(int _key);
   Entry * findValueEntry(int _key);
+  Entry * findLeftMostChild();
 
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
   }
+
   Node * getNextLeaf() {
     return extra_entry;
   }
+  
   void setNextLeaf(Node * _next_leaf) {
     extra_entry = _next_leaf;
   }
@@ -103,8 +113,19 @@ public:
   void printKeys() {
     printf("[");
     for (auto it = pairs.begin(); it != pairs.end(); it++) {
-      if (it == pairs.begin()) printf("%d", (*it).first);
-      else printf(",%d", (*it).first);
+      if (it == pairs.begin()) printf("%d", it->first);
+      else printf(",%d", it->first);
+    }
+    printf("] ");
+  }
+
+  void printValues() {
+    printf("[");
+    for (auto it = pairs.begin(); it != pairs.end(); it++) {
+      if (it == pairs.begin()) 
+        printf("%s", ((Value *)it->second)->getValue().c_str() );
+      else 
+        printf(",%s", ((Value *)it->second)->getValue().c_str() );
     }
     printf("] ");
   }
