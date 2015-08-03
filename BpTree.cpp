@@ -179,7 +179,6 @@ BpTree::~BpTree() {
 }
 
 
-
 // Desired assignment overrides
 void BpTree::operator =(const BpTree& _other) {
   root = _other.root;
@@ -198,19 +197,23 @@ bool BpTree::insert(int _key, string& _value) {
 
   int key = _key;
   Entry * entry = new Value(_value);
-  while ( current_node->insert(key, entry) == FULL ) {
+  int insert_status;
+  while ( (insert_status = current_node->insert(key, entry)) == FULL ) {
     auto p = current_node->split(key, entry);
     if (p.second == NULL) break;
     key = p.first;
     entry = p.second;
     if (current_node->parent == NULL) {
-      makeNewRoot(key, (Node *)p.second, current_node);
+      makeNewRoot(key, (Node *)entry, current_node);
+      insert_status = SUCCESS;
       break;
     }
     else {
       current_node = current_node->parent;
     }
   }
+
+  return insert_status == SUCCESS;
 
 }
 
