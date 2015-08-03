@@ -30,3 +30,7 @@
 *.out
 *.app
 
+# Log files
+*.log
+
+*.ignore
