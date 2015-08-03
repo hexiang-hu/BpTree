@@ -47,6 +47,7 @@ public:
     type = _type;
     GC.pool.push_back(this);
   }
+  virtual ~Entry() {}
   int getType() {
     return type;
   }
