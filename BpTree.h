@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 #include <queue>
+#include <list>
 
 #define SUCCESS       0
 #define UNKNOWN_ERROR 1
@@ -21,13 +22,27 @@
 using namespace std;
 
 
+
 class Entry {
 private:
+  class GarbageCollectionPool {
+  public:
+    list<Entry *> pool;
+    GarbageCollectionPool() {};
+    ~GarbageCollectionPool() {
+      for (auto it = pool.begin(); it != pool.end(); it++) {
+        delete *it;
+      }
+    }
+  };
+  static GarbageCollectionPool pool;
+
   int type;
 public:
   Entry(int _type) { 
   // Type=1 is Value, Type=2 is Node
     type = _type;
+    pool.pool.push_back(this);
   }
   int getType() {
     return type;
