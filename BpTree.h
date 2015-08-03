@@ -71,6 +71,7 @@ public:
     GCpool.erase(this);
 >>>>>>> 3991e37... Modify GCPool to adapt local Entry variable
   }
+  virtual ~Entry() {}
   int getType() {
     return type;
   }
