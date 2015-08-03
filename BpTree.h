@@ -13,6 +13,8 @@
 #define UNKNOWN_ERROR 1
 #define FULL          2
 #define SAME_KEY      3
+#define KEY_NOT_FOUND 4
+#define TOO_FEW_KEYS  5
 
 #define CLASS_VALUE   1
 #define CLASS_NODE    2
@@ -35,21 +37,20 @@ private:
       }
     }
   };
-  static GarbageCollectionPool pool;
+  static GarbageCollectionPool GC;
 
   int type;
+
 public:
   Entry(int _type) { 
-  // Type=1 is Value, Type=2 is Node
+    // Type=1 is Value, Type=2 is Node
     type = _type;
-    pool.pool.push_back(this);
+    GC.pool.push_back(this);
   }
   int getType() {
     return type;
   }
 };
-
-
 
 
 class Value: public Entry {
@@ -107,6 +108,12 @@ public:
   Entry * findChild(int _key);
   Entry * findValueEntry(int _key);
   Entry * findLeftMostChild();
+  
+  bool removeValueEntry(int _key);
+  int  remove(int _key);
+  
+  pair<int, Entry *> coalesce( Node * _sibling);
+  int redistribute(Node * _sibling);
 
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);

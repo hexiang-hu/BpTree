@@ -4,7 +4,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 // Entry class
-Entry::GarbageCollectionPool Entry::pool = Entry::GarbageCollectionPool();
+Entry::GarbageCollectionPool Entry::GC = Entry::GarbageCollectionPool();
 
 
 
@@ -161,17 +161,36 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   return make_pair(new_key, (Entry *)left_node);
 }
 
-// int Node::getHeight() {
-//   int height = 0;
-//   Node * current_node = this;
-//   while ( current_node->parent != NULL ) {
-//     current_node = current_node->parent;
-//   }
-//   return height;
-// }
+bool Node::removeValueEntry(int _key) {
+  auto it = pairs.begin()
+  while(it != pairs.end())
+  {
+    if ( it->first == _key)
+    {
+      pairs.erase(it);
+      return true;
+    }
+    it++;
+  }
 
+  // Note:
+  // since we already introduced an external memory management tool 
+  // for entries, set pointer to an unused entry is good enough, and 
+  // may not cause issues like memory leak in the end of the program
+  // execution
+  
+  return false;
+}
 
+int Node::remove(int _key) {
 
+  if( this->removeValueEntry(_key) == false)
+    return KEY_NOT_FOUND;
+  
+  // return TOO_FEW_KEYS
+
+  return SUCCESS
+}
 
 
 
@@ -248,6 +267,20 @@ bool BpTree::insert(int _key, string& _value) {
 
 
 bool BpTree::remove(int _key) {
+  
+  Node * current_node = root;
+  while( !current_node->isLeaf() ){
+    current_node = (Node *) current_node->findChild(_key);
+  }
+  
+  if( current_node->remove(_key) == false) 
+    // The case that there is no such key in the bpTree
+    return false;
+  }
+
+
+  // If the 
+
   return true;
 }
 
