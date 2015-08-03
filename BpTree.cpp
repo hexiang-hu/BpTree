@@ -126,7 +126,7 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   int new_key;
   if (isLeaf()) {
     if (temp_left_sib != NULL) temp_left_sib->setNextLeaf(left_node);
-    left_node->setNextLeaf( getNextLeaf() );
+    left_node->setNextLeaf( this );
     new_key = pairs[ (pairs.size()+1)/2 ].first;
   }
   else {
