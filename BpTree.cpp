@@ -223,26 +223,38 @@ int Node::remove(int _key) {
   return SUCCESS;
 }
 
-bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
+void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
 
   if( right_to_left ){ 
     
     auto entry = _right->pairs.front();
     _right->pairs.erase(_right->pairs.begin());
     _left->pairs.push_back(entry);
+    
   }
   else {
     // Left to Right
     auto entry = _left->pairs.back();
     _left->pairs.pop_back();
     _right->pairs.insert( _right->pairs.begin(), entry);
+
   }
-  
-  return true;
+
+  // Redistribute higher-level keys
+  auto parent = _right->parent;
+  for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+    if( it->second == _right ){
+      it->first = _right->pairs.front().first;
+    }
+  }
+  // Handle the case of extra entry
+  if( parent->extra_entry == _right ){
+    parent->pairs.back().first = _right->pairs.front().first;
+  }
 }
 
-bool Node::coalesce( Node * _left, Node * _right) {
-  return true;
+void Node::coalesce( Node * _left, Node * _right) {
+  
 }
 
 

@@ -130,10 +130,27 @@ int main(int argc, const char * argv[]) {
     printf("=> Value Tree:\n");bptree.printValues();
 
 
+    bptree.remove(19);
     bptree.remove(45);
-    printf("################ delete 45 (Test Redistribution) ########################\n"); 
+    printf("################ delete 19, 45 (Test Redistribution) ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
+
+
+    bptree.remove(9);
+    printf("################ delete 9 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
+    // bptree.remove(6);
+    // printf("################ delete 6 ########################\n"); 
+    // printf("=> Key Tree:\n");bptree.printKeys();
+    // printf("=> Value Tree:\n");bptree.printValues();
+
+    // bptree.remove(8);
+    // printf("################ delete 8 ########################\n"); 
+    // printf("=> Key Tree:\n");bptree.printKeys();
+    // printf("=> Value Tree:\n");bptree.printValues();
 
     printf("\n");
     string value = bptree.find(23);

@@ -65,9 +65,11 @@ public:
 #endif
 
   Entry(int _type) { 
+
 #ifdef DEBUG
     id = global_id_counter++;
 #endif
+    
     type = _type;
     GCpool.insert(this);
   }
@@ -141,8 +143,8 @@ public:
   bool removeValueEntry(int _key);
   int  remove(int _key);
   
-  static bool coalesce( Node * _left, Node * _right);
-  static bool redistribute(Node * _left, Node * _right, bool right_to_left = false);
+  static void coalesce( Node * _left, Node * _right);
+  static void redistribute(Node * _left, Node * _right, bool right_to_left = false);
   static bool isSibling(Node * _left, Node * _right);
 
   bool hasTooFewKeys();
@@ -166,9 +168,12 @@ public:
   }
 
   void printKeys() {
+
+
 #ifdef DEBUG
     printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
 #endif
+
     printf("[");
     for (auto it = pairs.begin(); it != pairs.end(); it++) {
       if (it == pairs.begin()) printf("%d", it->first);
