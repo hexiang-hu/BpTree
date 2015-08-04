@@ -167,7 +167,7 @@ public:
 
   void printKeys() {
 #ifdef DEBUG
-    printf(" {id:%d,", id);
+    printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
 #endif
     printf("[");
     for (auto it = pairs.begin(); it != pairs.end(); it++) {
@@ -175,9 +175,6 @@ public:
       else printf(",%d", it->first);
     }
     printf("] ");
-#ifdef DEBUG
-    printf(",pid:%d} ", parent == NULL? 0 : parent->id);
-#endif
   }
 
   void printValues() {
