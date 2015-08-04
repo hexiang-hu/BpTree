@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////
 // Entry class
 Entry::GarbageCollectionPool Entry::GCpool = Entry::GarbageCollectionPool();
-
+#ifdef DEBUG
+int Entry::global_id_counter = 1;
+#endif
 
 
 
@@ -146,10 +148,12 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if (it->first != new_key) {
       left_node->pairs.push_back( *it );
+      if ( !isLeaf() ) ((Node *)it->second)->parent = left_node;
     }
     else {
       if ( !isLeaf() ) {
         left_node->extra_entry = (Node *)(it->second);
+        left_node->extra_entry->parent = left_node;
         it++;
       }
       pairs.erase(pairs.begin(), it);
@@ -434,6 +438,7 @@ void BpTree::printKeys() {
     }
     cur.second->printKeys();
   }
+  
   printf("\n");
 }
 

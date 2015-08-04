@@ -59,8 +59,15 @@ private:
   int type;
 
 public:
+#ifdef DEBUG
+  int id;
+  static int global_id_counter;
+#endif
+
   Entry(int _type) { 
-    // Type=1 is Value, Type=2 is Node
+#ifdef DEBUG
+    id = global_id_counter++;
+#endif
     type = _type;
     GCpool.insert(this);
   }
@@ -95,7 +102,6 @@ public:
 class Node: public Entry {
 
 public:
-
   vector< pair<int, Entry *> > pairs;
 
   // Note:
@@ -160,12 +166,18 @@ public:
   }
 
   void printKeys() {
+#ifdef DEBUG
+    printf(" {id:%d,", id);
+#endif
     printf("[");
     for (auto it = pairs.begin(); it != pairs.end(); it++) {
       if (it == pairs.begin()) printf("%d", it->first);
       else printf(",%d", it->first);
     }
     printf("] ");
+#ifdef DEBUG
+    printf(",pid:%d} ", parent == NULL? 0 : parent->id);
+#endif
   }
 
   void printValues() {
