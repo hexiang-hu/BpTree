@@ -66,9 +66,7 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
 //   number += 1;
 // }
 
-Node::~Node() {
-  tree->node_number -= 1;
-}
+Node::~Node() {}
 
 
 Entry * Node::findChild(int _key) {
