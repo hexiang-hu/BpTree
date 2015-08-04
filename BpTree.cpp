@@ -224,21 +224,18 @@ int Node::remove(int _key) {
 }
 
 bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
-  Node * distribute_from  = _left;
-  Node * distribute_to    = _right;
 
   if( right_to_left ){ 
-    distribute_from = _right; distribute_to = _left;
     
-    auto entry = distribute_from->pairs.front();
-    distribute_from->pairs.erase(distribute_from->pairs.begin());
-    distribute_to->pairs.insert( distribute_to->pairs.end(), entry);
+    auto entry = _right->pairs.front();
+    _right->pairs.erase(_right->pairs.begin());
+    _left->pairs.push_back(entry);
   }
   else {
     // Left to Right
-    auto entry = distribute_from->pairs.back();
-    distribute_from->pairs.erase(distribute_from->pairs.end());
-    distribute_to->pairs.insert( distribute_to->pairs.begin(), entry);
+    auto entry = _left->pairs.back();
+    _left->pairs.pop_back();
+    _right->pairs.insert( _right->pairs.begin(), entry);
   }
   
   return true;
