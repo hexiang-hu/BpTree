@@ -146,7 +146,6 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if (it->first != new_key) {
       left_node->pairs.push_back( *it );
-      if ( !isLeaf() ) ((Node *)(it->second))->parent = left_node;
     }
     else {
       if ( !isLeaf() ) {
