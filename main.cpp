@@ -123,7 +123,7 @@ int main(int argc, const char * argv[]) {
     BpTree bptree2(key_num);
     srand (time(NULL));
     for (int i=0; i<node_number; i++) {
-      bptree2.insert(rand() % (node_number * 2), key_val_map[ rand() % 11 ]);
+      bptree2.insert(rand() % (node_number * 2), key_val_map[ 2 ]);
     }
 
     printf("\n\n\n\n################ Huge tree ########################\n");
