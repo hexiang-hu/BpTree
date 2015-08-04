@@ -164,20 +164,27 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   return make_pair(new_key, (Entry *)left_node);
 }
 
-bool Node::hasTooFewKeys() {
-
-#ifdef DEBUG
-  if( pairs.size() <= int( tree->key_num / 2 ) )
-    cout << "Node::hasTooFewKeys() - Fewer than border key values" << endl;
-#endif
-
-  return ( pairs.size() <= int( tree->key_num / 2 ) && !tree->isRoot(this) );
+int Node::numOfEntries() {
+  if( isLeaf() )
+    return ( pairs.size() );
+  else
+    return ( pairs.size() + int(extra_entry != NULL) ); 
 }
 
 bool Node::hasEnoughKeys() {
-  return ( pairs.size() > int( (tree->key_num - 1 ) / 2 + 1 ) );
-
+  if( isLeaf() )
+    return ( numOfEntries() >= FLOOR(tree->key_num + 1, 2) );
+  else
+    return ( numOfEntries() >= CEIL(tree->key_num + 1, 2) );
 }
+
+bool Node::hasExtraKeys() {
+  if( isLeaf() )
+    return ( numOfEntries() > FLOOR(tree->key_num + 1, 2) );
+  else
+    return ( numOfEntries() > CEIL(tree->key_num + 1, 2) );
+}
+
 bool Node::isSibling(Node * _left, Node * _right) {
     if( _left == NULL || _right == NULL) 
       return false;
@@ -217,7 +224,7 @@ int Node::remove(int _key) {
   if( removeValueEntry(_key) == false)
     return KEY_NOT_FOUND;
   
-  if( hasTooFewKeys() )
+  if( !hasEnoughKeys() )
     return TOO_FEW_KEYS;
 
   return SUCCESS;
@@ -253,7 +260,7 @@ void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
   }
 }
 
-void Node::coalesce( Node * _left, Node * _right) {
+void Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
   
 }
 
@@ -357,8 +364,7 @@ bool BpTree::remove(int _key) {
 
     if( current_node->left_ptr != NULL                      && 
       Node::isSibling(current_node->left_ptr, current_node) && 
-      current_node->left_ptr->hasEnoughKeys()               ){
- 
+      current_node->left_ptr->hasExtraKeys()                ){
 
 #ifdef DEBUG
       cout << "BpTree::remove - Redistribute: from left sibling to right node..." << endl;
@@ -369,7 +375,7 @@ bool BpTree::remove(int _key) {
       Node::redistribute( current_node->left_ptr, current_node );
     }else if( current_node->right_ptr != NULL                &&
       Node::isSibling(current_node, current_node->right_ptr) && 
-      current_node->right_ptr->hasEnoughKeys()               ){
+      current_node->right_ptr->hasExtraKeys()                ){
         // 2. Redistribute to right sibling
 
 
@@ -380,7 +386,7 @@ bool BpTree::remove(int _key) {
 
       Node::redistribute( current_node, current_node->right_ptr, true );
     }else if( current_node->left_ptr != NULL                && 
-              !current_node->left_ptr->hasEnoughKeys()      ){
+              !current_node->left_ptr->hasExtraKeys()       ){
         // 3. Coalesce left sibling
 
 
@@ -392,7 +398,7 @@ bool BpTree::remove(int _key) {
 
       Node::coalesce(current_node->left_ptr, current_node);
     }else if( current_node->right_ptr != NULL                 && 
-              !current_node->right_ptr->hasEnoughKeys()       ){
+              !current_node->right_ptr->hasExtraKeys()        ){
         // 4. Coalesce right sibling
 
 

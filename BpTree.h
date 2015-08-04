@@ -21,6 +21,9 @@
 
 #define DEBUG
 
+#define FLOOR(x, y) int( (x) / (y) )
+#define CEIL(x, y)  int( (x - 1) / (y) + 1 )
+
 using namespace std;
 class Entry;
 class BpTree;
@@ -143,13 +146,15 @@ public:
   bool removeValueEntry(int _key);
   int  remove(int _key);
   
-  static void coalesce( Node * _left, Node * _right);
+  static void coalesce( Node * _left, Node * _right, bool merge_to_right = false);
   static void redistribute(Node * _left, Node * _right, bool right_to_left = false);
   static bool isSibling(Node * _left, Node * _right);
 
-  bool hasTooFewKeys();
+  int numOfEntries();
   bool hasEnoughKeys();
+  bool hasExtraKeys();
 
+  
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
   }
