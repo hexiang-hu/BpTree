@@ -140,7 +140,8 @@ public:
   static bool isSibling(Node * _left, Node * _right);
 
   bool hasTooFewKeys();
-  
+  bool hasEnoughKeys();
+
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
   }

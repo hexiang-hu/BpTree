@@ -165,14 +165,15 @@ bool Node::hasTooFewKeys() {
 #ifdef DEBUG
   if( pairs.size() <= int( tree->key_num / 2 ) )
     cout << "Node::hasTooFewKeys() - Fewer than border key values" << endl;
-
-  if( tree->isRoot(this) )
-    cout << "Node::hasTooFewKeys() - Root Key" << endl;
 #endif
 
   return ( pairs.size() <= int( tree->key_num / 2 ) && !tree->isRoot(this) );
 }
 
+bool Node::hasEnoughKeys() {
+  return ( pairs.size() > int( (tree->key_num - 1 ) / 2 + 1 ) );
+
+}
 bool Node::isSibling(Node * _left, Node * _right) {
     if( _left == NULL || _right == NULL) 
       return false;
@@ -333,50 +334,67 @@ bool BpTree::remove(int _key) {
     return false;
   else if( delete_status == TOO_FEW_KEYS) 
   {
+
+
 #ifdef DEBUG
       cout << "BpTree::remove - Current Node has too few keys..." << endl;
 #endif
 
+
+
     if( current_node->left_ptr != NULL                      && 
       Node::isSibling(current_node->left_ptr, current_node) && 
-      !current_node->left_ptr->hasTooFewKeys() ){
+      current_node->left_ptr->hasEnoughKeys()               ){
+ 
 
 #ifdef DEBUG
       cout << "BpTree::remove - Redistribute: from left sibling to right node..." << endl;
 #endif
+
+
         // 1. Redistribute to left sibling
       Node::redistribute( current_node->left_ptr, current_node );
     }else if( current_node->right_ptr != NULL                &&
       Node::isSibling(current_node, current_node->right_ptr) && 
-      !current_node->right_ptr->hasTooFewKeys()        ){
+      current_node->right_ptr->hasEnoughKeys()               ){
         // 2. Redistribute to right sibling
+
+
 #ifdef DEBUG
       cout << "BpTree::remove - Redistribute: from right sibling to left node..." << endl;
 #endif
+
+
       Node::redistribute( current_node, current_node->right_ptr, true );
     }else if( current_node->left_ptr != NULL                && 
-      Node::isSibling(current_node->left_ptr, current_node) && 
-      current_node->left_ptr->hasTooFewKeys()         ){
+              !current_node->left_ptr->hasEnoughKeys()      ){
         // 3. Coalesce left sibling
+
+
 
 #ifdef DEBUG
       cout << "BpTree::remove - Coalesce: left sibling and current node" << endl;
 #endif
 
+
+      Node::coalesce(current_node->left_ptr, current_node);
     }else if( current_node->right_ptr != NULL                 && 
-      Node::isSibling(current_node, current_node->right_ptr)  && 
-      current_node->right_ptr->hasTooFewKeys()          ){
+              !current_node->right_ptr->hasEnoughKeys()       ){
         // 4. Coalesce right sibling
+
 
 #ifdef DEBUG
       cout << "BpTree::remove - Coalesce: current node and right sibling" << endl;
 #endif
-    }else {
 
+      Node::coalesce(current_node, current_node->right_ptr);
     }
-
+    else {
+#ifdef DEBUG
+      cout << "BpTree::remove - Fatal Problem" << endl;
+#endif      
+    }
   }
-
 
   return ( delete_status == SUCCESS );
 }
