@@ -19,11 +19,14 @@
 #define CLASS_VALUE   1
 #define CLASS_NODE    2
 
-
+#define DEBUG
 
 using namespace std;
+class Entry;
+class BpTree;
 
-
+////////////////////////////////////////////////////////////////////////
+// Entry class (Origin)
 
 class Entry {
 private:
@@ -38,7 +41,7 @@ private:
     ~GarbageCollectionPool() {
       is_accessable = false;
       for (auto it = pool.begin(); it != pool.end(); it++) {
-        delete *it;
+        delete (*it);
       }
     }
 
@@ -50,6 +53,7 @@ private:
     }
 
   };
+
   static GarbageCollectionPool GCpool;
 
   int type;
@@ -69,6 +73,9 @@ public:
 };
 
 
+////////////////////////////////////////////////////////////////////////
+// Value class
+
 class Value: public Entry {
 private:
   string value;
@@ -82,8 +89,8 @@ public:
 };
 
 
-class BpTree;
-
+////////////////////////////////////////////////////////////////////////
+// Node class
 
 class Node: public Entry {
 
@@ -104,10 +111,10 @@ public:
   BpTree * tree;
 
   // Louis recommends to store this value
-  Node * left_sib;  
+  Node * left_ptr;  
 
   // Louis recommends to store this value, the same as extra_entry when this node is a leaf node
-  Node * right_sib; 
+  Node * right_ptr; 
 
   // Constructor
   Node(BpTree * _tree);
@@ -128,9 +135,12 @@ public:
   bool removeValueEntry(int _key);
   int  remove(int _key);
   
-  pair<int, Entry *> coalesce( Node * _sibling);
-  int redistribute(Node * _sibling);
+  static bool coalesce( Node * _left, Node * _right);
+  static bool redistribute(Node * _left, Node * _right, bool right_to_left = false);
+  static bool isSibling(Node * _left, Node * _right);
 
+  bool hasTooFewKeys();
+  
   bool isLeaf() {
     return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
   }
@@ -144,8 +154,8 @@ public:
   }
 
   void becomeRightSibingOf(Node * _left) {
-    if (_left != NULL) _left->right_sib = this;
-    this->left_sib = _left;
+    if (_left != NULL) _left->right_ptr = this;
+    this->left_ptr = _left;
   }
 
   void printKeys() {
@@ -170,7 +180,8 @@ public:
 };
 
 
-
+////////////////////////////////////////////////////////////////////////
+// BpTree class
 
 class BpTree {
 private:
@@ -183,6 +194,10 @@ private:
   }
 
 public:
+
+  bool isRoot(Node * _root) { 
+    return ( _root == root );
+  }
 
   int node_number;
   int key_num;

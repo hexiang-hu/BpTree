@@ -23,8 +23,8 @@ Node::Node(BpTree * _tree) : Entry(CLASS_NODE) {
   extra_entry = NULL; 
 
   parent = NULL;
-  left_sib = NULL;
-  right_sib = NULL;
+  left_ptr = NULL;
+  right_ptr = NULL;
 
   tree = _tree;
   tree->node_number += 1;
@@ -43,8 +43,8 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
   right->parent = this;
   parent = NULL;
 
-  left_sib = NULL;
-  right_sib = NULL;
+  left_ptr = NULL;
+  right_ptr = NULL;
 
   right->becomeRightSibingOf(left);
 
@@ -55,8 +55,8 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
 // Node::Node(const Node& _copy) {
   
 //   parent      = _copy.parent;
-//   left_sib    = _copy.left_sib;
-//   right_sib   = _copy.right_sib;
+//   left_ptr    = _copy.left_ptr;
+//   right_ptr   = _copy.right_ptr;
 //   extra_entry = _copy.extra_entry;
 
 //   pairs       = _copy.pairs;
@@ -106,12 +106,12 @@ int Node::insert(int _key, Entry * _entry) {
 
 int Node::forceInsert(int _key, Entry * _entry) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
-    if ( _key < (*it).first ) {
+    if ( _key < it->first ) {
       pairs.insert(it, make_pair(_key, _entry));
       if ( !isLeaf() ) ((Node *) _entry)->parent = this;
       return SUCCESS;
     }
-    else if (_key == (*it).first) {
+    else if (_key == it->first) {
       return SAME_KEY;
     } 
   }
@@ -125,17 +125,17 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   int insert_status = forceInsert(_key, _entry);
   if (insert_status == SAME_KEY) return pair<int, Entry *>(-1, NULL); // didn't insert anything
 
-  // from: temp_left_sib <---> this
-  // to:   temp_left_sib <---> left_node <---> this
+  // from: temp_left_ptr <---> this
+  // to:   temp_left_ptr <---> left_node <---> this
   Node * left_node = new Node(tree);
 
-  Node * temp_left_sib = left_sib;
-  left_node->becomeRightSibingOf( temp_left_sib );
+  Node * temp_left_ptr = left_ptr;
+  left_node->becomeRightSibingOf( temp_left_ptr );
   becomeRightSibingOf( left_node );
 
   int new_key;
   if (isLeaf()) {
-    if (temp_left_sib != NULL) temp_left_sib->setNextLeaf(left_node);
+    if (temp_left_ptr != NULL) temp_left_ptr->setNextLeaf(left_node);
     left_node->setNextLeaf( this );
     new_key = pairs[ (pairs.size()+1)/2 ].first;
   }
@@ -144,13 +144,13 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   }
 
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
-    if ((*it).first != new_key) {
+    if (it->first != new_key) {
       left_node->pairs.push_back( *it );
-      if ( !isLeaf() ) ((Node *)(*it).second)->parent = left_node;
+      if ( !isLeaf() ) ((Node *)(it->second))->parent = left_node;
     }
     else {
       if ( !isLeaf() ) {
-        left_node->extra_entry = (Node *)(*it).second;
+        left_node->extra_entry = (Node *)(it->second);
         it++;
       }
       pairs.erase(pairs.begin(), it);
@@ -161,8 +161,34 @@ pair<int, Entry *> Node::split(int _key, Entry * _entry) {
   return make_pair(new_key, (Entry *)left_node);
 }
 
+bool Node::hasTooFewKeys() {
+
+#ifdef DEBUG
+  if( pairs.size() <= int( tree->key_num / 2 ) )
+    cout << "Node::hasTooFewKeys() - Fewer than border key values" << endl;
+
+  if( tree->isRoot(this) )
+    cout << "Node::hasTooFewKeys() - Root Key" << endl;
+#endif
+
+  return ( pairs.size() <= int( tree->key_num / 2 ) && !tree->isRoot(this) );
+}
+
+bool Node::isSibling(Node * _left, Node * _right) {
+    if( _left == NULL || _right == NULL) 
+      return false;
+
+#ifdef DEBUG
+    cout << "_left->parent's 1st child key: " << _left->parent->pairs.front().first 
+         << "_right->parent's 1st child key: " << _right->parent->pairs.front().first << endl;
+    cout << "Node::isSibling - _left->parent == _right->parent " << ((_left->parent == _right->parent )?"True":"False") << endl;
+#endif 
+    
+    return ( _left->parent == _right->parent );
+}
+
 bool Node::removeValueEntry(int _key) {
-  auto it = pairs.begin()
+  auto it = pairs.begin();
   while(it != pairs.end())
   {
     if ( it->first == _key)
@@ -184,15 +210,39 @@ bool Node::removeValueEntry(int _key) {
 
 int Node::remove(int _key) {
 
-  if( this->removeValueEntry(_key) == false)
+  if( removeValueEntry(_key) == false)
     return KEY_NOT_FOUND;
   
-  // return TOO_FEW_KEYS
+  if( hasTooFewKeys() )
+    return TOO_FEW_KEYS;
 
-  return SUCCESS
+  return SUCCESS;
 }
 
+bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
+  Node * distribute_from  = _left;
+  Node * distribute_to    = _right;
 
+  if( right_to_left ){ 
+    distribute_from = _right; distribute_to = _left;
+    
+    auto entry = distribute_from->pairs.front();
+    distribute_from->pairs.erase(distribute_from->pairs.begin());
+    distribute_to->pairs.insert( distribute_to->pairs.end(), entry);
+  }
+  else {
+    // Left to Right
+    auto entry = distribute_from->pairs.back();
+    distribute_from->pairs.erase(distribute_from->pairs.end());
+    distribute_to->pairs.insert( distribute_to->pairs.begin(), entry);
+  }
+  
+  return true;
+}
+
+bool Node::coalesce( Node * _left, Node * _right) {
+  return true;
+}
 
 
 
@@ -261,8 +311,7 @@ bool BpTree::insert(int _key, string& _value) {
     }
   }
 
-  return insert_status == SUCCESS;
-
+  return ( insert_status == SUCCESS );
 }
 
 
@@ -273,15 +322,64 @@ bool BpTree::remove(int _key) {
     current_node = (Node *) current_node->findChild(_key);
   }
   
-  if( current_node->remove(_key) == false) 
+  int delete_status = current_node->remove(_key); 
+
+#ifdef DEBUG
+      cout << "#############################################################" << endl; 
+      cout << "BpTree::remove - Delete status: " << delete_status << endl;
+#endif
+
+  if( delete_status == KEY_NOT_FOUND) 
     // The case that there is no such key in the bpTree
     return false;
+  else if( delete_status == TOO_FEW_KEYS) 
+  {
+#ifdef DEBUG
+      cout << "BpTree::remove - Current Node has too few keys..." << endl;
+#endif
+
+    if( current_node->left_ptr != NULL                      && 
+      Node::isSibling(current_node->left_ptr, current_node) && 
+      !current_node->left_ptr->hasTooFewKeys() ){
+
+#ifdef DEBUG
+      cout << "BpTree::remove - Redistribute: from left sibling to right node..." << endl;
+#endif
+        // 1. Redistribute to left sibling
+      Node::redistribute( current_node->left_ptr, current_node );
+    }else if( current_node->right_ptr != NULL                &&
+      Node::isSibling(current_node, current_node->right_ptr) && 
+      !current_node->right_ptr->hasTooFewKeys()        ){
+        // 2. Redistribute to right sibling
+#ifdef DEBUG
+      cout << "BpTree::remove - Redistribute: from right sibling to left node..." << endl;
+#endif
+      Node::redistribute( current_node, current_node->right_ptr, true );
+    }else if( current_node->left_ptr != NULL                && 
+      Node::isSibling(current_node->left_ptr, current_node) && 
+      current_node->left_ptr->hasTooFewKeys()         ){
+        // 3. Coalesce left sibling
+
+#ifdef DEBUG
+      cout << "BpTree::remove - Coalesce: left sibling and current node" << endl;
+#endif
+
+    }else if( current_node->right_ptr != NULL                 && 
+      Node::isSibling(current_node, current_node->right_ptr)  && 
+      current_node->right_ptr->hasTooFewKeys()          ){
+        // 4. Coalesce right sibling
+
+#ifdef DEBUG
+      cout << "BpTree::remove - Coalesce: current node and right sibling" << endl;
+#endif
+    }else {
+
+    }
+
   }
 
 
-  // If the 
-
-  return true;
+  return ( delete_status == SUCCESS );
 }
 
 

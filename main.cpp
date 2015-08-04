@@ -4,8 +4,8 @@
 #include <time.h>
 #include <map>
 
-#define CASE_NUM_1 0x00000001
-#define CASE_NUM_2 0x00000002
+#define CASE_NUM_0 0x00000001
+#define CASE_NUM_1 0x00000002
 
 
 int main(int argc, const char * argv[]) {
@@ -16,21 +16,21 @@ int main(int argc, const char * argv[]) {
     switch ( atoi((const char *) argv[1]) )
     {
       case 0:
-        tCaseNum = (CASE_NUM_1);
+        tCaseNum = (CASE_NUM_0);
         break;
       case 1:
-        tCaseNum = (CASE_NUM_2);
+        tCaseNum = (CASE_NUM_1);
         break;
       case 2:
-        tCaseNum = (CASE_NUM_1 | CASE_NUM_2);
+        tCaseNum = (CASE_NUM_0 | CASE_NUM_1);
         break;
       default:
         break;
     } 
 
     printf("Specified Test Cases: \n");
-    printf("- Case 0: %s\n", (((tCaseNum & CASE_NUM_1) != 0)?"On":"Off") );
-    printf("- Case 1: %s\n", (((tCaseNum & CASE_NUM_2) != 0)?"On":"Off") );
+    printf("- Case 0: %s\n", (((tCaseNum & CASE_NUM_0) != 0)?"On":"Off") );
+    printf("- Case 1: %s\n", (((tCaseNum & CASE_NUM_1) != 0)?"On":"Off") );
 
   }
   else {
@@ -55,10 +55,20 @@ int main(int argc, const char * argv[]) {
   key_val_map[19] = string("I");
   key_val_map[9]  = string("J");
   key_val_map[7]  = string("K");
+  key_val_map[31] = string("L");
+  key_val_map[39] = string("M");
+  key_val_map[45] = string("N");
+  key_val_map[51] = string("O");
+  key_val_map[60] = string("P");
+  key_val_map[93] = string("Q");
+  key_val_map[77] = string("R");
 
-  if(tCaseNum & CASE_NUM_1) {
 
-    printf("###############################################\n"); 
+
+
+  if(tCaseNum & CASE_NUM_0) {
+
+    printf("#############################################################\n"); 
 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
@@ -94,12 +104,36 @@ int main(int argc, const char * argv[]) {
     printf("################ insert 19, 9, 5(duplicated) ########################\n"); bptree.printKeys();
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
-    
+
+    // bptree.remove(5);
+    // bptree.remove(23);
+    // printf("################ delete 5, 23(redistribution) ########################\n"); bptree.printKeys();
+    // printf("=> Key Tree:\n");bptree.printKeys();
+    // printf("=> Value Tree:\n");bptree.printValues();
+
     bptree.insert(7, key_val_map[7]);
     printf("################ insert 7 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
+
+    bptree.insert(31, key_val_map[31]);
+    bptree.insert(45, key_val_map[45]);
+    bptree.insert(51, key_val_map[51]);
+    bptree.insert(60, key_val_map[60]);
+    bptree.insert(93, key_val_map[93]);
+    bptree.insert(39, key_val_map[39]);
+    bptree.insert(77, key_val_map[77]);
+
+    printf("################ insert MORE to test delete ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
+
+    bptree.remove(45);
+    printf("################ delete 45 (Test Redistribution) ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
 
     printf("\n");
     string value = bptree.find(23);
@@ -116,7 +150,7 @@ int main(int argc, const char * argv[]) {
 
   /////////////////////////TEST CASE 2
 
-  if(tCaseNum & CASE_NUM_2) {
+  if(tCaseNum & CASE_NUM_1) {
     int key_num = 50;
     int node_number = 50*50*50;
 
