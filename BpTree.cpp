@@ -676,12 +676,13 @@ bool BpTree::remove(int _key) {
     }
     else {
       // 5. Single node case
+
+#ifdef DEBUG
       if( isRoot(current_node) ){
         cout << "BpTree::remove - Single root case: normal" << endl;
       }else{
         cout << "Abnormal Case..." << endl;
       }
-#ifdef DEBUG
       cout << "BpTree::remove - Single Node Case" << endl;
 #endif      
     }

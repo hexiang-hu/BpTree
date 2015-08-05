@@ -184,11 +184,17 @@ int main(int argc, const char * argv[]) {
     BpTree bptree2(key_num);
     srand (time(NULL));
     for (int i=0; i<node_number; i++) {
-      bptree2.insert(rand() % (node_number * 2), key_val_map[ 2 ]);
+      bptree2.insert(rand() % (node_number * 2), key_val_map.begin()->second);
     }
-
-    printf("\n\n\n\n################ Huge tree ########################\n");
+    printf("\n\n\n\n################ Huge tree - after insert 50*50*50 nodes ########################\n");
     bptree2.printKeys();
+
+    for (int i=0; i<node_number * 2; i++) {
+      bptree2.remove(i);
+    }
+    printf("\n\n\n\n################ Huge tree - after remove 50*50*50 nodes ########################\n");
+    bptree2.printKeys();
+    
   }
 
   if(tCaseNum & CASE_NUM_2) {
