@@ -279,7 +279,7 @@ int main(int argc, const char * argv[]) {
     bptree.insert(6, key_val_map[6]);
     bptree.insert(19, key_val_map[19]);
     bptree.insert(9, key_val_map[9]);
-    bptree.insert(5, key_val_map[5]);
+    bptree.insert(5, key_val_map[5]); // duplicated insert, should return false and didn't insert
     bptree.insert(7, key_val_map[7]);
     bptree.insert(31, key_val_map[31]);
     bptree.insert(45, key_val_map[45]);

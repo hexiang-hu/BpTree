@@ -76,7 +76,11 @@ Node * Node::getNextLeaf() {
 void Node::printKeys() {
 
 #ifdef DEBUG
-  printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
+  printf("  %d,p:%d,l:%d,r:%d,ks:", 
+    id, 
+    parent == NULL ? 0 : parent->id, 
+    left_ptr == NULL ? 0 : left_ptr->id, 
+    right_ptr == NULL ? 0 : right_ptr->id);
 #endif
 
   printf("[");
@@ -84,7 +88,21 @@ void Node::printKeys() {
     if (it == pairs.begin()) printf("%d", it->first);
     else printf(",%d", it->first);
   }
-  printf("] ");
+  printf("]");
+
+#ifdef DEBUG
+  if (!isLeaf()) {
+    printf(",cld:[");
+    for (auto it = pairs.begin(); it != pairs.end(); it++) {
+      if (it == pairs.begin()) printf("%d", it->second->id);
+      else printf(",%d", it->second->id);
+    }
+    printf(",%d", extra_entry->id);
+    printf("]");
+  }
+#endif
+  printf(" ");
+
 }
 
 void Node::printValues() {
