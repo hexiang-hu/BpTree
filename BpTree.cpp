@@ -267,10 +267,6 @@ bool Node::removeValueEntry(int _key) {
 }
 
 int Node::remove(int _key) {
-#ifdef DEBUG
-  cout << "Node::remove - isLeaf(): " << isLeaf() << endl;
-  cout << "Node::remove - hasEnoughKeys(): " << hasEnoughKeys() << endl;
-#endif
 
   if( isLeaf() && removeValueEntry(_key) == false ){
     return KEY_NOT_FOUND;
@@ -675,10 +671,8 @@ bool BpTree::remove(int _key) {
 
 #ifdef DEBUG
       cout << "BpTree::remove - Iterate parent node" << endl;
-      // cout << "BpTree::remove - Parent node size: "  << current_node->numOfEntries()           << endl;
-      // cout << "BpTree::remove - Node criteria: "     << CEIL( current_node->tree->key_num , 2) << endl;
-      // cout << "BpTree::remove - HasEnoughKeys: "     << current_node->hasEnoughKeys() << endl;
 #endif  
+
     }
     else
     {
