@@ -181,6 +181,11 @@ private:
     height += 1;
   }
 
+  void deleteEmptyRoot() {
+    root = root->extra_entry;
+    height -= 1;
+  }
+
 public:
 
   bool isRoot(Node * _root) { 

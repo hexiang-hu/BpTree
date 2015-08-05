@@ -676,9 +676,16 @@ bool BpTree::remove(int _key) {
     }
     else
     {
+      // Delete empty root node and make the second level nodes the be the root
+      deleteEmptyRoot();
+      
 #ifdef DEBUG
       cout << "BpTree::remove - Reach the root of tree" << endl;
+      cout << "BpTree::remove - Cut down tree height" << endl;
+
 #endif       
+      break;
+
     }
 
   }
