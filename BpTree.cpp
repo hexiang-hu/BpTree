@@ -66,9 +66,7 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
 //   number += 1;
 // }
 
-Node::~Node() {
-  tree->node_number -= 1;
-}
+Node::~Node() {}
 
 bool Node::isLeaf() {
   return ( tree->node_number == 1 ) || (pairs[0].second->getType() == CLASS_VALUE);
