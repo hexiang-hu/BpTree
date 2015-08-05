@@ -179,6 +179,7 @@ public:
 
   // Set up sibling relation [util function for insert]
   void becomeRightSibingOf(Node * _left);
+  void becomeLeftSiblingOf(Node * _right);
 
   // Print current node's key values
   void printKeys();

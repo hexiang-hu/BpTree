@@ -68,6 +68,10 @@ void Node::becomeRightSibingOf(Node * _left) {
   if (_left != NULL) _left->right_ptr = this;
   this->left_ptr = _left;
 }
+void Node::becomeLeftSiblingOf(Node * _right){
+  if (_right != NULL) _right->left_ptr = this;
+  this->right_ptr = _right;
+}
 
 Node * Node::getNextLeaf() {
   return extra_entry;
@@ -99,6 +103,9 @@ void Node::printKeys() {
     }
     printf(",%d", extra_entry->id);
     printf("]");
+  }
+  else {
+    printf(",ext:%d", extra_entry == NULL ? 0 : extra_entry->id);
   }
 #endif
   printf(" ");
@@ -399,9 +406,10 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
         // Change parent node
         _right->pairs.insert(_right->pairs.begin(), *it);
       }
-      if( _left->left_ptr != NULL ) {
-        _right->becomeRightSibingOf(_left->left_ptr); 
-      }
+      // if( _left->left_ptr != NULL ) {
+      //   _right->becomeRightSibingOf(_left->left_ptr); 
+      // }
+      _right->becomeRightSibingOf(_left->left_ptr); 
 
       if( _left->getNextLeaf() != NULL ){
         _left->getNextLeaf()->setNextLeaf(_right);
@@ -425,9 +433,10 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
         _left->pairs.push_back(*it);
       }
 
-      if( _right->right_ptr != NULL ){
-        _right->right_ptr->becomeRightSibingOf(_left);
-      }
+      // if( _right->right_ptr != NULL ){
+      //   _right->right_ptr->becomeRightSibingOf(_left);
+      // }
+      _left->becomeLeftSiblingOf(_right->right_ptr);
 
       _left->setNextLeaf(_right->getNextLeaf());
 
@@ -478,9 +487,10 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
         _right->pairs.insert(_right->pairs.begin(), *it);
       }
 
-      if( _left->left_ptr != NULL ) {
-        _right->becomeRightSibingOf(_left->left_ptr); 
-      }
+      // if( _left->left_ptr != NULL ) {
+      //   _right->becomeRightSibingOf(_left->left_ptr); 
+      // }
+      _right->becomeRightSibingOf(_left->left_ptr);
 
       _left->forceRemove();
 
@@ -508,9 +518,10 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
       
       _left->setNextLeaf(entry);
 
-      if( _right->right_ptr != NULL ){
-        _right->right_ptr->becomeRightSibingOf(_left);
-      } 
+      // if( _right->right_ptr != NULL ){
+      //   _right->right_ptr->becomeRightSibingOf(_left);
+      // } 
+      _left->becomeLeftSiblingOf(_right->right_ptr);
 
       _right->forceRemove();
 
