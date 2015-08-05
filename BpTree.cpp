@@ -282,7 +282,10 @@ int Node::remove(int _key) {
   return SUCCESS;
 }
 
-void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
+bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
+  if( _left->parent != _right->parent )
+    return false; 
+
   auto parent = _right->parent;
 
   if( _left->isLeaf() && _right->isLeaf() ) {
@@ -356,7 +359,6 @@ void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
       // Redistribute higher-level keys
       for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
         if( it->second == _left ){
-          // it->first = _left->pairs.front().first;
           it->first = entry.first;
         }
       }
@@ -364,21 +366,23 @@ void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
 
   }
 
+  return true;
 }
 void Node::forceRemove() {
   this->pairs.clear();
   this->tree->node_number--;
 }
 
-void Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
+bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
   // Function phylosophy
   // ==========================================================
   // 1. Merge Nodes
   // 2. Delete Parent Key
   // 3. Rebalance Parent Key
+  if( _left->parent != _right->parent )
+    return false; 
 
   auto parent = _left->parent;
- 
 
   if( _left->isLeaf() && _right->isLeaf() ){
     
@@ -404,6 +408,7 @@ void Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
       }
 
     }else{
+
       for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
       {
         _left->pairs.push_back(*it);
@@ -439,29 +444,29 @@ void Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
 
   }else {
 
-    // if( merge_to_right ){
-    //   for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
-    //   {
-    //     _right->pairs.insert(_right->pairs.begin(), *it);
-    //   }
-    //   _left->pairs.clear();
+    if( merge_to_right ){
+      for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
+      {
+        _right->pairs.insert(_right->pairs.begin(), *it);
+      }
+      _left->pairs.clear();
 
 
-    // }
-    // else{
-    //   for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
-    //   {
-    //     _left->pairs.push_back(*it);
-    //   }
-    //   _right->pairs.clear();
+    }
+    else{
+      for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
+      {
+        _left->pairs.push_back(*it);
+      }
+      _right->pairs.clear();
+    }
 
-
-    // }
 #ifdef DEBUG
     cout << "Coalesce Interior Node...Still not implemented." << endl;
 #endif
   }
 
+  return true;
 }
 
 
@@ -552,9 +557,9 @@ bool BpTree::remove(int _key) {
       cout << "BpTree::remove - Current Node has too few keys..." << endl;
 #endif
 
-    if( current_node->left_ptr != NULL                      && 
-      Node::isSibling(current_node->left_ptr, current_node) && 
-      current_node->left_ptr->hasExtraKeys()                ){
+    if( current_node->left_ptr != NULL                        && 
+        Node::isSibling(current_node->left_ptr, current_node) && 
+        current_node->left_ptr->hasExtraKeys()                ){
 
 #ifdef DEBUG
       cout << "BpTree::remove - Redistribute: from left sibling to right node..." << endl;
@@ -564,9 +569,9 @@ bool BpTree::remove(int _key) {
         // 1. Redistribute to left sibling
       Node::redistribute( current_node->left_ptr, current_node );
 
-    }else if( current_node->right_ptr != NULL                &&
-      Node::isSibling(current_node, current_node->right_ptr) && 
-      current_node->right_ptr->hasExtraKeys()                ){
+    }else if( current_node->right_ptr != NULL                        &&
+              Node::isSibling(current_node, current_node->right_ptr) && 
+              current_node->right_ptr->hasExtraKeys()                ){
         // 2. Redistribute to right sibling
 
 
@@ -577,8 +582,9 @@ bool BpTree::remove(int _key) {
 
       Node::redistribute( current_node, current_node->right_ptr, true );
 
-    }else if( current_node->left_ptr != NULL                && 
-              !current_node->left_ptr->hasExtraKeys()       ){
+    }else if( current_node->left_ptr != NULL                          && 
+              Node::isSibling(current_node->left_ptr, current_node)   && 
+              !current_node->left_ptr->hasExtraKeys()                 ){
         // 3. Coalesce left sibling
 
 
@@ -590,8 +596,9 @@ bool BpTree::remove(int _key) {
 
       Node::coalesce(current_node->left_ptr, current_node);
 
-    }else if( current_node->right_ptr != NULL                 && 
-              !current_node->right_ptr->hasExtraKeys()        ){
+    }else if( current_node->right_ptr != NULL                        &&
+              Node::isSibling(current_node, current_node->right_ptr) && 
+              !current_node->right_ptr->hasExtraKeys()               ){
         // 4. Coalesce right sibling
 
 

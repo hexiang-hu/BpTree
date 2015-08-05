@@ -147,8 +147,8 @@ public:
   void forceRemove();
   int  remove(int _key);
   
-  static void coalesce( Node * _left, Node * _right, bool merge_to_right = false);
-  static void redistribute(Node * _left, Node * _right, bool right_to_left = false);
+  static bool coalesce( Node * _left, Node * _right, bool merge_to_right = false);
+  static bool redistribute(Node * _left, Node * _right, bool right_to_left = false);
   static bool isSibling(Node * _left, Node * _right);
 
   int numOfEntries();
