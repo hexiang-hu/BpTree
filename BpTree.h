@@ -19,8 +19,6 @@
 #define CLASS_VALUE   1
 #define CLASS_NODE    2
 
-#define DEBUG
-
 #define FLOOR(x, y) int( (x) / (y) )
 #define CEIL(x, y)  int( (x - 1) / (y) + 1 )
 
