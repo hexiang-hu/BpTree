@@ -387,7 +387,6 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
   if( _left->isLeaf() && _right->isLeaf() ){
     
     if( merge_to_right ){
-
       for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
       {
         // Change parent node
@@ -404,6 +403,7 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
       {
         if( it->second == _left ){
           parent->pairs.erase(it);
+          break;
         }
       }
 
@@ -421,7 +421,7 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
 
       _right->forceRemove();
 
-      int key = 0;
+      int key = -1;
       for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++)
       {
         if( it->second == _right ){
@@ -431,7 +431,7 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
         }
       }
 
-      if( parent->getNextLeaf() != _right && key != 0 ){
+      if( parent->getNextLeaf() != _right && key != -1 ){
         for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
           if( it->second == _left )
             it->first = key;
@@ -444,32 +444,87 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
 
   }else {
 
+    int key = -1; 
+    for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+      if( it->second == _left ){
+        key = it->first;
+      }
+    }
+
     if( merge_to_right ){
+      auto new_entry = make_pair( key, _left->getNextLeaf() );
+
+      ((Node *)new_entry.second)->parent = _right;
+      _right->pairs.insert(_right->pairs.begin(), new_entry);
+
       for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
       {
+        // Change parent node
+        ((Node *)it->second)->parent = _right;
         _right->pairs.insert(_right->pairs.begin(), *it);
       }
-      _left->pairs.clear();
 
+      if( _left->left_ptr != NULL ) {
+        _right->becomeRightSibingOf(_left->left_ptr); 
+      }
 
+      _left->forceRemove();
+
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++)
+      {
+        if( it->second == _left ){
+          parent->pairs.erase(it);
+          break;
+        }
+      }
     }
     else{
+
+      auto new_entry = make_pair( key, _left->getNextLeaf());
+      _left->pairs.push_back(new_entry);
+
       for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
       {
+        ((Node *)it->second)->parent = _left;
         _left->pairs.push_back(*it);
       }
-      _right->pairs.clear();
+
+      auto entry = _right->getNextLeaf();
+      entry->parent = _left;
+      
+      _left->setNextLeaf(entry);
+
+      if( _right->right_ptr != NULL ){
+        _right->right_ptr->becomeRightSibingOf(_left);
+      } 
+
+      _right->forceRemove();
+
+      key = -1;
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+        if( it->second == _right ){
+          key = it->first;
+          parent->pairs.erase(it);
+          break;
+        }
+      }
+
+      if( parent->getNextLeaf() != _right && key != -1 ){
+        for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+          if( it->second == _left )
+            it->first = key;
+        }
+      } else {
+        parent->pairs.pop_back();
+        parent->setNextLeaf(_left);
+      }
+
     }
 
-#ifdef DEBUG
-    cout << "Coalesce Interior Node...Still not implemented." << endl;
-#endif
   }
 
   return true;
 }
-
-
 
 
 
