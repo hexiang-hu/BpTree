@@ -280,13 +280,15 @@ bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
     // For leaf node, redistribution may be easier
 
     if( right_to_left ){
+      // Leaf node - Right to Left
+
       auto entry = _right->pairs.front();
       _right->pairs.erase(_right->pairs.begin());
       _left->pairs.push_back(entry);
 
     }
     else {
-      // Left to Right
+      // Leaf node - Left to Right
       auto entry = _left->pairs.back();
       _left->pairs.pop_back();
       _right->pairs.insert( _right->pairs.begin(), entry);
@@ -618,14 +620,13 @@ bool BpTree::remove(int _key) {
       cout << "BpTree::remove - Redistribute: from left sibling to right node..." << endl;
 #endif
 
-
-        // 1. Redistribute to left sibling
+      // 1. Redistribute to left sibling
       Node::redistribute( current_node->left_ptr, current_node );
 
     }else if( current_node->right_ptr != NULL                        &&
               Node::isSibling(current_node, current_node->right_ptr) && 
               current_node->right_ptr->hasExtraKeys()                ){
-        // 2. Redistribute to right sibling
+      // 2. Redistribute to right sibling
 
 
 #ifdef DEBUG
@@ -638,9 +639,7 @@ bool BpTree::remove(int _key) {
     }else if( current_node->left_ptr != NULL                          && 
               Node::isSibling(current_node->left_ptr, current_node)   && 
               !current_node->left_ptr->hasExtraKeys()                 ){
-        // 3. Coalesce left sibling
-
-
+      // 3. Coalesce left sibling
 
 #ifdef DEBUG
       cout << "BpTree::remove - Coalesce: left sibling and current node" << endl;
@@ -652,7 +651,7 @@ bool BpTree::remove(int _key) {
     }else if( current_node->right_ptr != NULL                        &&
               Node::isSibling(current_node, current_node->right_ptr) && 
               !current_node->right_ptr->hasExtraKeys()               ){
-        // 4. Coalesce right sibling
+      // 4. Coalesce right sibling
 
 
 #ifdef DEBUG
@@ -663,8 +662,13 @@ bool BpTree::remove(int _key) {
 
     }
     else {
+      // 5. Single node case
+      if( isRoot(current_node) )
+        cout << "BpTree::remove - Single root case: normal" << endl;
+      else
+        cout << "Abnormal Case..." << endl;
 #ifdef DEBUG
-      cout << "BpTree::remove - Fatal Problem" << endl;
+      cout << "BpTree::remove - Single Node Case" << endl;
 #endif      
     }
 
