@@ -343,11 +343,6 @@ int main(int argc, const char * argv[]) {
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
-    bptree.remove(5);
-    printf("################ Deletes 5 ########################\n"); 
-    printf("=> Key Tree:\n");bptree.printKeys();
-    printf("=> Value Tree:\n");bptree.printValues();
-
     bptree.remove(7);
     printf("################ Deletes 7 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
@@ -385,7 +380,6 @@ int main(int argc, const char * argv[]) {
     printf("=> Value Tree:\n");bptree.printValues();
 
     bptree.remove(77);
-
     printf("################ Deletes 77 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();

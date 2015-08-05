@@ -203,10 +203,17 @@ private:
   }
 
   // Function for reduce height when bpTree has too less items
-  void deleteEmptyRoot() {
-    root = root->extra_entry;
-    root->parent = NULL;
-    height -= 1;
+  void deleteEmptyNode(Node * current_node) {
+    if(isRoot(current_node) && height > 1) {
+      root = current_node->extra_entry;
+      root->parent = NULL;
+      height -= 1;
+    }else {
+
+#ifdef DEBUG
+      cout << "BpTree::deleteEmptyNode - this is a single root, can't be deleted" << endl;
+#endif 
+    }
   }
 
 public:

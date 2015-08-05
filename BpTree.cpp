@@ -296,15 +296,11 @@ bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
 
     // Redistribute higher-level keys
     for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
-      if( it->second == _right ){
+      if( it->second == _left ){
         it->first = _right->pairs.front().first;
       }
     }
 
-    // Handle the case of extra entry
-    if( parent->getNextLeaf() == _right ){
-      parent->pairs.back().first = _right->pairs.front().first;
-    }
   }
   else {
     int key = -1; 
@@ -659,14 +655,14 @@ bool BpTree::remove(int _key) {
 #endif
 
       Node::coalesce(current_node, current_node->right_ptr);
-
     }
     else {
       // 5. Single node case
-      if( isRoot(current_node) )
+      if( isRoot(current_node) ){
         cout << "BpTree::remove - Single root case: normal" << endl;
-      else
+      }else{
         cout << "Abnormal Case..." << endl;
+      }
 #ifdef DEBUG
       cout << "BpTree::remove - Single Node Case" << endl;
 #endif      
@@ -682,14 +678,13 @@ bool BpTree::remove(int _key) {
     }
     else
     {
-      // Delete empty root node and make the second level nodes the be the root
-      deleteEmptyRoot();
-      
+
 #ifdef DEBUG
       cout << "BpTree::remove - Reach the root of tree" << endl;
       cout << "BpTree::remove - Cut down tree height" << endl;
 #endif       
-
+      // Delete empty root node and make the second level nodes the be the root
+      deleteEmptyNode(current_node);
       break;
 
     }
