@@ -31,6 +31,9 @@ class BpTree;
 
 class Entry {
 private:
+
+  // Singleton class to prevent memory leak
+  // Using this pool to track every allocated object of Entry class, and remove them all at the end
   class GarbageCollectionPool {
   private:
     set<Entry *> pool;
@@ -113,10 +116,10 @@ public:
   Node * extra_entry;    
 
   // The following 3 attributes are for the sake of easier implementaion in insert() and remove()
-  // Those should not be implemented with shared_ptr
   // John recommends to store this value
   Node * parent;    
 
+  // BpTree pointer
   BpTree * tree;
 
   // Louis recommends to store this value
@@ -179,6 +182,8 @@ public:
 
   // Set up sibling relation [util function for insert]
   void becomeRightSibingOf(Node * _left);
+
+  // Set up sibling relation [util function for insert]
   void becomeLeftSiblingOf(Node * _right);
 
   // Print current node's key values
