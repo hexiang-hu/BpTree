@@ -54,18 +54,6 @@ Node::Node(BpTree * _tree, int _key, Node * left, Node * right) : Entry(CLASS_NO
   tree->node_number += 1;
 }
 
-// Node::Node(const Node& _copy) {
-  
-//   parent      = _copy.parent;
-//   left_ptr    = _copy.left_ptr;
-//   right_ptr   = _copy.right_ptr;
-//   extra_entry = _copy.extra_entry;
-
-//   pairs       = _copy.pairs;
-
-//   number += 1;
-// }
-
 Node::~Node() {}
 
 bool Node::isLeaf() {
@@ -100,6 +88,10 @@ void Node::printKeys() {
 }
 
 void Node::printValues() {
+#ifdef DEBUG
+  printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
+#endif
+
   printf("[");
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
     if (it == pairs.begin()) 
@@ -367,6 +359,8 @@ bool Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
 void Node::forceRemove() {
   this->pairs.clear();
   this->tree->node_number--;
+  this->left_ptr    = NULL;
+  this->right_ptr   = NULL;
 }
 
 bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
@@ -383,6 +377,7 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
   if( _left->isLeaf() && _right->isLeaf() ){
     
     if( merge_to_right ){
+      // Leaf Node - Merge to Right
       for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
       {
         // Change parent node
@@ -390,7 +385,10 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
       }
       if( _left->left_ptr != NULL ) {
         _right->becomeRightSibingOf(_left->left_ptr); 
-        _left->left_ptr->setNextLeaf(_right);
+      }
+
+      if( _left->getNextLeaf() != NULL ){
+        _left->getNextLeaf()->setNextLeaf(_right);
       }
 
       _left->forceRemove();
@@ -404,6 +402,7 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
       }
 
     }else{
+      // Leaf Node - Merge to Left
 
       for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
       {
@@ -412,8 +411,9 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
 
       if( _right->right_ptr != NULL ){
         _right->right_ptr->becomeRightSibingOf(_left);
-        _left->setNextLeaf(_right->right_ptr);
-      } 
+      }
+
+      _left->setNextLeaf(_right->getNextLeaf());
 
       _right->forceRemove();
 
@@ -448,6 +448,8 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
     }
 
     if( merge_to_right ){
+      // Interior Node - Merge to Right
+
       auto new_entry = make_pair( key, _left->getNextLeaf() );
 
       ((Node *)new_entry.second)->parent = _right;
@@ -473,8 +475,8 @@ bool Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
           break;
         }
       }
-    }
-    else{
+    }else{
+      // Interior Node - Merge to Left
 
       auto new_entry = make_pair( key, _left->getNextLeaf());
       _left->pairs.push_back(new_entry);
@@ -666,7 +668,7 @@ bool BpTree::remove(int _key) {
 #endif      
     }
 
-    if (current_node->parent != NULL) {
+    if ( current_node->parent != NULL ) {
       current_node = current_node->parent;
 
 #ifdef DEBUG
@@ -682,8 +684,8 @@ bool BpTree::remove(int _key) {
 #ifdef DEBUG
       cout << "BpTree::remove - Reach the root of tree" << endl;
       cout << "BpTree::remove - Cut down tree height" << endl;
-
 #endif       
+
       break;
 
     }

@@ -213,22 +213,51 @@ int main(int argc, const char * argv[]) {
     bptree.remove(2);
     bptree.remove(5);
     bptree.remove(8);
+    printf("################ Deletes 2, 5, 8, 60 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
     bptree.remove(60);
+    printf("################ Deletes 60 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
     bptree.remove(77);
     bptree.remove(39);
-    printf("################ Deletes 2, 5, 8, 60, 77, 39 ########################\n"); 
+    printf("################ Deletes 77, 39 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
     bptree.remove(45);
     bptree.remove(64);
-    bptree.remove(51);
-    printf("################ Deletes 45, 51 ########################\n"); 
+    printf("################ Deletes 45, 64 ########################\n"); 
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
+    bptree.remove(51);
+    printf("################ Deletes 51 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
 
+    bptree.insert(31, key_val_map[31]);
+    bptree.insert(45, key_val_map[45]);
+    bptree.insert(51, key_val_map[51]);
+    bptree.insert(60, key_val_map[60]);
+    bptree.insert(93, key_val_map[93]);
+    bptree.insert(39, key_val_map[39]);
+    bptree.insert(77, key_val_map[77]);
 
+    printf("################ Add some entry again (31, 45, 51, 60, 93, 29, 77) ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
+    bptree.remove(51);
+    bptree.remove(60);
+    bptree.remove(93);
+
+    printf("################ Then remove again (51, 60, 93) ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
   }
 
   for (auto it = key_val_map.begin(); it != key_val_map.end(); ++it)

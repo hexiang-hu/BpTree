@@ -133,37 +133,57 @@ public:
   // Deconstructor
   ~Node();
 
+  // Insert functions 
   int insert(int _key, Entry * _entry);
   int forceInsert(int _key, Entry * _entry);
+  
+  // Split function for full condition of nodes
   pair<int, Entry *> split(int _key, Entry * _entry);
 
+  // Find functions
   Entry * findChild(int _key);
   Entry * findValueEntry(int _key);
   Entry * findLeftMostChild();
   
+  // Remove functions
   bool removeValueEntry(int _key);
   void forceRemove();
   int  remove(int _key);
   
+  // Static function for coalesce two sibling nodes
   static bool coalesce( Node * _left, Node * _right, bool merge_to_right = false);
+  
+  // Static function for redistribute two sibling nodes
   static bool redistribute(Node * _left, Node * _right, bool right_to_left = false);
+  
+  // Static function for checking if two nodes are siblings
   static bool isSibling(Node * _left, Node * _right);
 
+  // Get the number of pointers in current node, according to its node type
   int numOfEntries();
+
+  // Check if current node have enough keys to maintain valid
   bool hasEnoughKeys();
+
+  // Check if current node have extra entries to redistribute
   bool hasExtraKeys();
 
-  
+  // Check if current node is leaf node or interior node
   bool isLeaf();
 
+  // Return extra_leaf pointer
   Node * getNextLeaf();
   
+  // Set extra_leaf pointer
   void setNextLeaf(Node * _next_leaf);
 
+  // Set up sibling relation [util function for insert]
   void becomeRightSibingOf(Node * _left);
 
+  // Print current node's key values
   void printKeys();
 
+  // Print current nodes's entry values
   void printValues();
 };
 
@@ -176,11 +196,13 @@ private:
   Node * root;
   int height;
 
+  // Function for make new BpTree root while splitting
   void makeNewRoot(int _key, Node * _left, Node * _right) {
     root = new Node(this, _key, _left, _right);
     height += 1;
   }
 
+  // Function for reduce height when bpTree has too less items
   void deleteEmptyRoot() {
     root = root->extra_entry;
     height -= 1;
