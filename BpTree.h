@@ -205,6 +205,7 @@ private:
   // Function for reduce height when bpTree has too less items
   void deleteEmptyRoot() {
     root = root->extra_entry;
+    root->parent = NULL;
     height -= 1;
   }
 
