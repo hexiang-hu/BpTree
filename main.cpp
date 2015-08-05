@@ -142,13 +142,24 @@ int main(int argc, const char * argv[]) {
     printf("=> Key Tree:\n");bptree.printKeys();
     printf("=> Value Tree:\n");bptree.printValues();
 
-    // bptree.remove(6);
-    // printf("################ delete 6 ########################\n"); 
+    bptree.remove(6);
+    printf("################ delete 6 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
+    bptree.remove(8);
+    printf("################ delete 8 ########################\n"); 
+    printf("=> Key Tree:\n");bptree.printKeys();
+    printf("=> Value Tree:\n");bptree.printValues();
+
+    // bptree.remove(23);
+    // printf("################ delete 23 ########################\n"); 
     // printf("=> Key Tree:\n");bptree.printKeys();
     // printf("=> Value Tree:\n");bptree.printValues();
 
-    // bptree.remove(8);
-    // printf("################ delete 8 ########################\n"); 
+
+    // bptree.remove(31);
+    // printf("################ delete 31 ########################\n"); 
     // printf("=> Key Tree:\n");bptree.printKeys();
     // printf("=> Value Tree:\n");bptree.printValues();
 

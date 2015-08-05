@@ -70,6 +70,47 @@ Node::~Node() {
   tree->node_number -= 1;
 }
 
+bool Node::isLeaf() {
+  return ( tree->node_number == 1 ) || (pairs[0].second->getType() == CLASS_VALUE);
+}
+
+void Node::setNextLeaf(Node * _next_leaf) {
+  extra_entry = _next_leaf;
+}
+
+void Node::becomeRightSibingOf(Node * _left) {
+  if (_left != NULL) _left->right_ptr = this;
+  this->left_ptr = _left;
+}
+
+Node * Node::getNextLeaf() {
+  return extra_entry;
+}
+
+void Node::printKeys() {
+
+#ifdef DEBUG
+  printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
+#endif
+
+  printf("[");
+  for (auto it = pairs.begin(); it != pairs.end(); it++) {
+    if (it == pairs.begin()) printf("%d", it->first);
+    else printf(",%d", it->first);
+  }
+  printf("] ");
+}
+
+void Node::printValues() {
+  printf("[");
+  for (auto it = pairs.begin(); it != pairs.end(); it++) {
+    if (it == pairs.begin()) 
+      printf("%s", ((Value *)it->second)->getValue().c_str() );
+    else 
+      printf(",%s", ((Value *)it->second)->getValue().c_str() );
+  }
+  printf("] ");
+}
 
 Entry * Node::findChild(int _key) {
   for (auto it = pairs.begin(); it != pairs.end(); it++) {
@@ -172,6 +213,14 @@ int Node::numOfEntries() {
 }
 
 bool Node::hasEnoughKeys() {
+
+//  #ifdef DEBUG
+//   cout << "Node::hasEnoughKeys - isLeaf(): " << isLeaf() << endl;
+//   cout << "Node::hasEnoughKeys - numOfEntries(): " << numOfEntries() << endl;
+//   cout << "Node::hasEnoughKeys - ( numOfEntries() >= FLOOR(tree->key_num + 1, 2) ): " << (numOfEntries() >= FLOOR(tree->key_num + 1, 2)) << endl;
+//   cout << "Node::hasEnoughKeys - ( numOfEntries() >= CEIL(tree->key_num + 1, 2) ): " << ( numOfEntries() >= CEIL(tree->key_num + 1, 2) ) << endl;
+// #endif
+
   if( isLeaf() )
     return ( numOfEntries() >= FLOOR(tree->key_num + 1, 2) );
   else
@@ -189,11 +238,11 @@ bool Node::isSibling(Node * _left, Node * _right) {
     if( _left == NULL || _right == NULL) 
       return false;
 
-#ifdef DEBUG
-    cout << "_left->parent's 1st child key: " << _left->parent->pairs.front().first 
-         << "_right->parent's 1st child key: " << _right->parent->pairs.front().first << endl;
-    cout << "Node::isSibling - _left->parent == _right->parent " << ((_left->parent == _right->parent )?"True":"False") << endl;
-#endif 
+// #ifdef DEBUG
+//     cout << "_left->parent's 1st child key: " << _left->parent->pairs.front().first 
+//          << "_right->parent's 1st child key: " << _right->parent->pairs.front().first << endl;
+//     cout << "Node::isSibling - _left->parent == _right->parent " << ((_left->parent == _right->parent )?"True":"False") << endl;
+// #endif 
     
     return ( _left->parent == _right->parent );
 }
@@ -220,9 +269,14 @@ bool Node::removeValueEntry(int _key) {
 }
 
 int Node::remove(int _key) {
+#ifdef DEBUG
+  cout << "Node::remove - isLeaf(): " << isLeaf() << endl;
+  cout << "Node::remove - hasEnoughKeys(): " << hasEnoughKeys() << endl;
+#endif
 
-  if( removeValueEntry(_key) == false)
+  if( isLeaf() && removeValueEntry(_key) == false ){
     return KEY_NOT_FOUND;
+  }
   
   if( !hasEnoughKeys() )
     return TOO_FEW_KEYS;
@@ -231,37 +285,185 @@ int Node::remove(int _key) {
 }
 
 void Node::redistribute( Node * _left, Node * _right, bool right_to_left) {
-
-  if( right_to_left ){ 
-    
-    auto entry = _right->pairs.front();
-    _right->pairs.erase(_right->pairs.begin());
-    _left->pairs.push_back(entry);
-    
-  }
-  else {
-    // Left to Right
-    auto entry = _left->pairs.back();
-    _left->pairs.pop_back();
-    _right->pairs.insert( _right->pairs.begin(), entry);
-
-  }
-
-  // Redistribute higher-level keys
   auto parent = _right->parent;
-  for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
-    if( it->second == _right ){
-      it->first = _right->pairs.front().first;
+
+  if( _left->isLeaf() && _right->isLeaf() ) {
+    // For leaf node, redistribution may be easier
+
+    if( right_to_left ){
+      auto entry = _right->pairs.front();
+      _right->pairs.erase(_right->pairs.begin());
+      _left->pairs.push_back(entry);
+
+    }
+    else {
+      // Left to Right
+      auto entry = _left->pairs.back();
+      _left->pairs.pop_back();
+      _right->pairs.insert( _right->pairs.begin(), entry);
+    }
+
+    // Redistribute higher-level keys
+    for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+      if( it->second == _right ){
+        it->first = _right->pairs.front().first;
+      }
+    }
+
+    // Handle the case of extra entry
+    if( parent->getNextLeaf() == _right ){
+      parent->pairs.back().first = _right->pairs.front().first;
     }
   }
-  // Handle the case of extra entry
-  if( parent->extra_entry == _right ){
-    parent->pairs.back().first = _right->pairs.front().first;
+  else {
+    int key = -1; 
+    for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+      if( it->second == _left ){
+        key = it->first;
+      }
+    }
+    // cout << "Node::redistribute - Key value: " << key << endl;
+    if( right_to_left ){
+      auto entry = _right->pairs.front(); 
+
+      auto new_entry = make_pair( key, _left->getNextLeaf());
+      _left->pairs.push_back(new_entry);
+
+      _right->pairs.erase(_right->pairs.begin());
+
+      // Set the parent of left entry
+      ((Node *)entry.second)->parent = _left;
+      _left->setNextLeaf( (Node *) entry.second );
+
+      // Redistribute higher-level keys
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+        if( it->second == _left ){
+          // it->first = _right->pairs.front().first;
+          it->first = entry.first;
+        }
+      }
+    }
+    else {
+      // Left to Right
+      auto entry = _left->pairs.back(); 
+      auto new_entry = make_pair(key, _left->getNextLeaf());
+
+      _left->setNextLeaf( (Node *) entry.second);
+      _left->pairs.pop_back();
+
+      // Set the parent of right entry
+      ((Node *)new_entry.second)->parent = _right;
+      _right->pairs.insert( _right->pairs.begin(), new_entry);
+
+      // Redistribute higher-level keys
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+        if( it->second == _left ){
+          // it->first = _left->pairs.front().first;
+          it->first = entry.first;
+        }
+      }
+    }
+
   }
+
+}
+void Node::forceRemove() {
+  this->pairs.clear();
+  this->tree->node_number--;
 }
 
 void Node::coalesce( Node * _left, Node * _right, bool merge_to_right) {
-  
+  // Function phylosophy
+  // ==========================================================
+  // 1. Merge Nodes
+  // 2. Delete Parent Key
+  // 3. Rebalance Parent Key
+
+  auto parent = _left->parent;
+ 
+
+  if( _left->isLeaf() && _right->isLeaf() ){
+    
+    if( merge_to_right ){
+
+      for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
+      {
+        // Change parent node
+        _right->pairs.insert(_right->pairs.begin(), *it);
+      }
+      if( _left->left_ptr != NULL ) {
+        _right->becomeRightSibingOf(_left->left_ptr); 
+        _left->left_ptr->setNextLeaf(_right);
+      }
+
+      _left->forceRemove();
+
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++)
+      {
+        if( it->second == _left ){
+          parent->pairs.erase(it);
+        }
+      }
+
+    }else{
+      for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
+      {
+        _left->pairs.push_back(*it);
+      }
+
+      if( _right->right_ptr != NULL ){
+        _right->right_ptr->becomeRightSibingOf(_left);
+        _left->setNextLeaf(_right->right_ptr);
+      } 
+
+      _right->forceRemove();
+
+      int key = 0;
+      for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++)
+      {
+        if( it->second == _right ){
+          key = it->first;
+          parent->pairs.erase(it);
+          break;
+        }
+      }
+
+      if( parent->getNextLeaf() != _right && key != 0 ){
+        for(auto it = parent->pairs.begin(); it != parent->pairs.end(); it++) {
+          if( it->second == _left )
+            it->first = key;
+        }
+      } else {
+        parent->pairs.pop_back();
+        parent->setNextLeaf(_left);
+      }
+    }
+
+  }else {
+
+    // if( merge_to_right ){
+    //   for (auto it = _left->pairs.end(); it != _left->pairs.begin(); --it)
+    //   {
+    //     _right->pairs.insert(_right->pairs.begin(), *it);
+    //   }
+    //   _left->pairs.clear();
+
+
+    // }
+    // else{
+    //   for (auto it = _right->pairs.begin(); it != _right->pairs.end(); ++it)
+    //   {
+    //     _left->pairs.push_back(*it);
+    //   }
+    //   _right->pairs.clear();
+
+
+    // }
+#ifdef DEBUG
+    cout << "Coalesce Interior Node...Still not implemented." << endl;
+#endif
+  }
+
 }
 
 
@@ -341,26 +543,16 @@ bool BpTree::remove(int _key) {
   while( !current_node->isLeaf() ){
     current_node = (Node *) current_node->findChild(_key);
   }
-  
-  int delete_status = current_node->remove(_key); 
 
-#ifdef DEBUG
-      cout << "#############################################################" << endl; 
-      cout << "BpTree::remove - Delete status: " << delete_status << endl;
-#endif
+  int delete_status;
 
-  if( delete_status == KEY_NOT_FOUND) 
-    // The case that there is no such key in the bpTree
-    return false;
-  else if( delete_status == TOO_FEW_KEYS) 
+  while( (delete_status = current_node->remove(_key)) == TOO_FEW_KEYS )
   {
 
 
 #ifdef DEBUG
       cout << "BpTree::remove - Current Node has too few keys..." << endl;
 #endif
-
-
 
     if( current_node->left_ptr != NULL                      && 
       Node::isSibling(current_node->left_ptr, current_node) && 
@@ -373,6 +565,7 @@ bool BpTree::remove(int _key) {
 
         // 1. Redistribute to left sibling
       Node::redistribute( current_node->left_ptr, current_node );
+
     }else if( current_node->right_ptr != NULL                &&
       Node::isSibling(current_node, current_node->right_ptr) && 
       current_node->right_ptr->hasExtraKeys()                ){
@@ -385,6 +578,7 @@ bool BpTree::remove(int _key) {
 
 
       Node::redistribute( current_node, current_node->right_ptr, true );
+
     }else if( current_node->left_ptr != NULL                && 
               !current_node->left_ptr->hasExtraKeys()       ){
         // 3. Coalesce left sibling
@@ -397,6 +591,7 @@ bool BpTree::remove(int _key) {
 
 
       Node::coalesce(current_node->left_ptr, current_node);
+
     }else if( current_node->right_ptr != NULL                 && 
               !current_node->right_ptr->hasExtraKeys()        ){
         // 4. Coalesce right sibling
@@ -407,13 +602,36 @@ bool BpTree::remove(int _key) {
 #endif
 
       Node::coalesce(current_node, current_node->right_ptr);
+
     }
     else {
 #ifdef DEBUG
       cout << "BpTree::remove - Fatal Problem" << endl;
 #endif      
     }
+
+    if (current_node->parent != NULL) {
+      current_node = current_node->parent;
+
+#ifdef DEBUG
+      cout << "BpTree::remove - Iterate parent node" << endl;
+      // cout << "BpTree::remove - Parent node size: "  << current_node->numOfEntries()           << endl;
+      // cout << "BpTree::remove - Node criteria: "     << CEIL( current_node->tree->key_num , 2) << endl;
+      // cout << "BpTree::remove - HasEnoughKeys: "     << current_node->hasEnoughKeys() << endl;
+#endif  
+    }
+    else
+    {
+#ifdef DEBUG
+      cout << "BpTree::remove - Reach the root of tree" << endl;
+#endif       
+    }
+
   }
+
+  if( delete_status == KEY_NOT_FOUND) 
+    // The case that there is no such key in the bpTree
+    return false;
 
   return ( delete_status == SUCCESS );
 }

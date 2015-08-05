@@ -144,6 +144,7 @@ public:
   Entry * findLeftMostChild();
   
   bool removeValueEntry(int _key);
+  void forceRemove();
   int  remove(int _key);
   
   static void coalesce( Node * _left, Node * _right, bool merge_to_right = false);
@@ -155,48 +156,17 @@ public:
   bool hasExtraKeys();
 
   
-  bool isLeaf() {
-    return (pairs.size() == 0) || (pairs[0].second->getType() == CLASS_VALUE);
-  }
+  bool isLeaf();
 
-  Node * getNextLeaf() {
-    return extra_entry;
-  }
+  Node * getNextLeaf();
   
-  void setNextLeaf(Node * _next_leaf) {
-    extra_entry = _next_leaf;
-  }
+  void setNextLeaf(Node * _next_leaf);
 
-  void becomeRightSibingOf(Node * _left) {
-    if (_left != NULL) _left->right_ptr = this;
-    this->left_ptr = _left;
-  }
+  void becomeRightSibingOf(Node * _left);
 
-  void printKeys() {
+  void printKeys();
 
-
-#ifdef DEBUG
-    printf("%d,%d,", id, parent == NULL ? 0 : parent->id);
-#endif
-
-    printf("[");
-    for (auto it = pairs.begin(); it != pairs.end(); it++) {
-      if (it == pairs.begin()) printf("%d", it->first);
-      else printf(",%d", it->first);
-    }
-    printf("] ");
-  }
-
-  void printValues() {
-    printf("[");
-    for (auto it = pairs.begin(); it != pairs.end(); it++) {
-      if (it == pairs.begin()) 
-        printf("%s", ((Value *)it->second)->getValue().c_str() );
-      else 
-        printf(",%s", ((Value *)it->second)->getValue().c_str() );
-    }
-    printf("] ");
-  }
+  void printValues();
 };
 
 
